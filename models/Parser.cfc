@@ -17,21 +17,21 @@ component assessors='false' {
   property numeric length;
 
   /* Constants */
-  this.IDENTIFIER      = 'Identifier';
-  this.LITERAL         = 'Literal';
-  this.BINARY_EXP      = 'BinaryExpression';
-  this.LOGICAL_EXP     = 'LogicalExpression';
-  this.PERIOD_CODE     = 46; // '.'
-  this.DQUOTE_CODE     = 34; // double quotes
-  this.OPAREN_CODE     = 40; // (
-  this.CPAREN_CODE     = 41; // )
+  variables.IDENTIFIER      = 'Identifier';
+  variables.LITERAL         = 'Literal';
+  variables.BINARY_EXP      = 'BinaryExpression';
+  variables.LOGICAL_EXP     = 'LogicalExpression';
+  variables.PERIOD_CODE     = 46; // '.'
+  variables.DQUOTE_CODE     = 34; // double quotes
+  variables.OPAREN_CODE     = 40; // (
+  variables.CPAREN_CODE     = 41; // )
 
   /**
    * Operator map for the binary operations with their values set to their
    * corresponding binary precedence for quick reference:
    * see [Order of operations](http://en.wikipedia.org/wiki/Order_of_operations#Programming_language)
    */
-  binaryOperators = {
+  variables.operators = {
     'or':     1
     ,'and':   2
     ,'eq':    3
@@ -55,18 +55,45 @@ component assessors='false' {
   /**
    * The values to return for the various literals we may encounter
    */
-  literals = {
+  variables.literals = {
     'true':  true
     ,'false': false
     ,'null':  'null'
   };
 
-  public Parser function init( required string expr ) {
-    variables.expression = expr;
-    variables.index = 1;
-    variables.length = len( expr );
-    variables.maxBinaryOperationLength = getMaxKeyLen( binaryOperators );
+  public Parser function init() {
+    variables.maxBinaryOperationLength = getMaxKeyLen( variables.operators );
     return this;
+  }
+
+  public struct function parse( required string expression ) {
+    variables.expression = arguments.expression;
+    variables.index = 1;
+    variables.length = len( arguments.expression );
+
+    // If empty expression early return
+    if ( len( variables.expression ) == 0 ) {
+      return {
+        'error': true
+        ,'errorMessage': 'Empty expression'
+      };
+    }
+
+    try {
+      var node = gobbleExpression();
+      // If no expression
+      if ( node.type != variables.BINARY_EXP && node.type != variables.LOGICAL_EXP ) {
+        node.error = true;
+        node[ 'errorMessage' ] = 'Not an expression';
+      }
+      return node;
+    }
+    catch ( Squrll error ) {
+      return {
+        'error': true
+        ,'errorMessage': error.message
+      }
+    }
   }
 
   private any function throwError( message, index ) {
@@ -89,14 +116,14 @@ component assessors='false' {
    *  Returns the precedence of a binary operator or `0` if it isn't a binary operator
    */
   private numeric function binaryPrecedence( operatorValue ) {
-    return binaryOperators.keyExists( operatorValue ) ? binaryOperators[ operatorValue ] : 0;
+    return variables.operators.keyExists( operatorValue ) ? variables.operators[ operatorValue ] : 0;
   }
 
   /**
    *  Utility funciton, note that `a and b` and `a |or b` are *logical* expressions, not binary expressions
    */
   private struct function createBinaryExpression( operator, left, right ) {
-    var type = ( operator == 'or' || operator == 'and' ) ? this.LOGICAL_EXP : this.BINARY_EXP;
+    var type = ( operator == 'or' || operator == 'and' ) ? variables.LOGICAL_EXP : variables.BINARY_EXP;
     return {
       'type': type
       ,'operator': operator
@@ -116,7 +143,7 @@ component assessors='false' {
     return ( ch == 95 ) || // `_`
       ( ch >= 65 && ch <= 90 ) || // A...Z
       ( ch >= 97 && ch <= 122 ) || // a...z
-      ( ch >= 128 && !structKeyExists( binaryOperators, chr( ch ) ) ); // any non-ASCII that is not an operator
+      ( ch >= 128 && !structKeyExists( variables.operators, chr( ch ) ) ); // any non-ASCII that is not an operator
   }
 
   private boolean function isIdentifierPart( ch ) {
@@ -125,11 +152,11 @@ component assessors='false' {
       ( ch >= 65 && ch <= 90 ) || // A...Z
       ( ch >= 97 && ch <= 122 ) || // a...z
       ( ch >= 48 && ch <= 57 ) || // 0...9
-      ( ch >= 128 && !structKeyExists( binaryOperators, chr( ch ) ) ); // any non-ASCII that is not an operator
+      ( ch >= 128 && !structKeyExists( variables.operators, chr( ch ) ) ); // any non-ASCII that is not an operator
   }
 
   private string function exprI( required numeric index ) {
-    return mid( expression, index, 1);
+    return mid( variables.expression, index, 1);
   }
 
   private numeric function exprICode( required numeric index ) {
@@ -164,10 +191,10 @@ component assessors='false' {
    */
   private any function gobbleBinaryOp() {
     gobbleSpaces();
-    var toCheck = mid( expression, index, maxBinaryOperationLength );
+    var toCheck = mid( variables.expression, index, maxBinaryOperationLength );
     var tcLen = len( toCheck );
     while ( tcLen > 0 ) {
-      if ( structKeyExists( binaryOperators, toCheck ) ) {
+      if ( structKeyExists( variables.operators, toCheck ) ) {
         index += tcLen;
         return toCheck;
       }
@@ -260,16 +287,16 @@ component assessors='false' {
     gobbleSpaces();
     ch = exprICode( index );
 
-    if ( isDecimalDigit( ch ) || ch == this.PERIOD_CODE ) {
+    if ( isDecimalDigit( ch ) || ch == variables.PERIOD_CODE ) {
       // Char code 46 is a dot `.` which can start off a numeric literal
       return gobbleNumericLiteral();
     }
-    else if ( ch == this.DQUOTE_CODE ) {
+    else if ( ch == variables.DQUOTE_CODE ) {
       // double quotes
       return gobbleStringLiteral();
     }
     else {
-      if ( isIdentifierStart( ch ) || ch == this.OPAREN_CODE ) { // open parenthesis
+      if ( isIdentifierStart( ch ) || ch == variables.OPAREN_CODE ) { // open parenthesis
         // `foo`
         return gobbleVariable();
       }
@@ -291,7 +318,7 @@ component assessors='false' {
       number &= exprI( index++ );
     }
 
-    if ( exprICode( index ) == this.PERIOD_CODE ) { // can start with a decimal marker
+    if ( exprICode( index ) == variables.PERIOD_CODE ) { // can start with a decimal marker
       number &= exprI( index++ );
 
       while ( isDecimalDigit( exprICode( index ) ) ) {
@@ -320,12 +347,12 @@ component assessors='false' {
       throwError( 'Variable names cannot start with a number (' &
         number & exprI( index ) & ')', index );
     }
-    else if ( chCode == this.PERIOD_CODE ) {
+    else if ( chCode == variables.PERIOD_CODE ) {
       throwError( 'Unexpected period', index );
     }
 
     return {
-      'type': this.LITERAL
+      'type': variables.LITERAL
       ,'value': LSParseNumber( number )
       ,'raw': number
       ,'error': false
@@ -358,7 +385,7 @@ component assessors='false' {
     }
 
     return {
-      'type': this.LITERAL
+      'type': variables.LITERAL
       ,'value': str
       ,'raw': quote & str & quote
       ,'error': false
@@ -394,19 +421,19 @@ component assessors='false' {
       }
     }
 
-    identifier = mid( expression, start, index - start );
+    identifier = mid( variables.expression, start, index - start );
 
-    if ( structKeyExists( literals, identifier ) ) {
+    if ( structKeyExists( variables.literals, identifier ) ) {
       return {
-        'type': this.LITERAL
-        ,'value': literals[ identifier ]
+        'type': variables.LITERAL
+        ,'value': variables.literals[ identifier ]
         ,'raw': identifier
         ,'error': false
       };
     }
     else {
       return {
-        'type': this.IDENTIFIER
+        'type': variables.IDENTIFIER
         ,'name': identifier
         ,'error': false
       };
@@ -422,7 +449,7 @@ component assessors='false' {
   private struct function gobbleVariable() {
     var node = '';
     var ch_i = exprICode( index );
-    if ( ch_i == this.OPAREN_CODE ) {
+    if ( ch_i == variables.OPAREN_CODE ) {
       node = gobbleGroup();
     }
     else {
@@ -444,38 +471,12 @@ component assessors='false' {
     index++;
     var node = gobbleExpression();
     gobbleSpaces();
-    if ( exprICode( index ) == this.CPAREN_CODE ) {
+    if ( exprICode( index ) == variables.CPAREN_CODE ) {
       index++;
       return node;
     }
     else {
       throwError( 'Unclosed (', index );
-    }
-  }
-
-  public struct function parse() {
-    // If empty expression early return
-    if ( len( expression ) == 0 ) {
-      return {
-        'error': true
-        ,'errorMessage': 'Empty expression'
-      };
-    }
-
-    try {
-      var node = gobbleExpression();
-      // If no expression
-      if ( node.type != this.BINARY_EXP && node.type != this.LOGICAL_EXP ) {
-        node.error = true;
-        node[ 'errorMessage' ] = 'Not an expression';
-      }
-      return node;
-    }
-    catch ( Squrll error ) {
-      return {
-        'error': true
-        ,'errorMessage': error.message
-      }
     }
   }
 

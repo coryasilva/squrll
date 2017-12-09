@@ -1,0 +1,16 @@
+# Testbox
+/testbox
+/tests/results
+/tests/resources/app/coldbox
+
+# NodeJS
+/node_modules
+
+# Coldbox Modules
+/modules
+
+# Editors
+.vscode
+
+# Project Specific
+/temp

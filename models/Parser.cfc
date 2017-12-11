@@ -1,11 +1,19 @@
 /**
- * NOTE: All of the gobbles below will modify `index` as we move along
+ * All of the gobbles below will modify `index` as we move along
+ * TODO: Add LIKE ANY
+ * TODO: Add NOT LIKE ANY
+ * TODO: Add ILIKE ANY
+ * TODO: Add NOT ILIKE ANY
+ * TODO: Add ANY
+ * TODO: Add NOT ANY
  */
 component assessors='false' {
+
   /**
    * The string expression that we are parsing
    */
   property string expression;
+
   /**
    * The character number we are currently at while `length` is a constant
    */
@@ -32,31 +40,33 @@ component assessors='false' {
    * see [Order of operations](http://en.wikipedia.org/wiki/Order_of_operations#Programming_language)
    */
   variables.operators = {
-    'or':     1
-    ,'and':   2
-    ,'eq':    3
-    ,'neq':   3
-    ,'is':    3
-    ,'nis':   3
-    ,'in':    3
-    ,'nin':   3
-    ,'like':  3
-    ,'nlike': 3
-    ,'lt':    4
-    ,'nlt':   4
-    ,'gt':    4
-    ,'ngt':   4
-    ,'lte':   4
-    ,'nlte':  4
-    ,'gte':   4
-    ,'ngte':  4
+    'or':      1
+    ,'and':    2
+    ,'eq':     3
+    ,'neq':    3
+    ,'is':     3
+    ,'nis':    3
+    ,'in':     3
+    ,'nin':    3
+    ,'like':   3
+    ,'nlike':  3
+    ,'ilike':  3
+    ,'nilike': 3
+    ,'lt':     4
+    ,'nlt':    4
+    ,'gt':     4
+    ,'ngt':    4
+    ,'lte':    4
+    ,'nlte':   4
+    ,'gte':    4
+    ,'ngte':   4
   };
 
   /**
    * The values to return for the various literals we may encounter
    */
   variables.literals = {
-    'true':  true
+    'true':   true
     ,'false': false
     ,'null':  'null'
   };
@@ -92,7 +102,7 @@ component assessors='false' {
       return {
         'error': true
         ,'errorMessage': error.message
-      }
+      };
     }
   }
 
@@ -125,11 +135,11 @@ component assessors='false' {
   private struct function createBinaryExpression( operator, left, right ) {
     var type = ( operator == 'or' || operator == 'and' ) ? variables.LOGICAL_EXP : variables.BINARY_EXP;
     return {
-      'type': type
+      'type':      type
       ,'operator': operator
-      ,'left': left
-      ,'right': right
-      ,'error': false
+      ,'left':     left
+      ,'right':    right
+      ,'error':    false
     };
   }
 
@@ -352,9 +362,9 @@ component assessors='false' {
     }
 
     return {
-      'type': variables.LITERAL
+      'type':   variables.LITERAL
       ,'value': LSParseNumber( number )
-      ,'raw': number
+      ,'raw':   number
       ,'error': false
     };
   }
@@ -385,9 +395,9 @@ component assessors='false' {
     }
 
     return {
-      'type': variables.LITERAL
+      'type':   variables.LITERAL
       ,'value': str
-      ,'raw': quote & str & quote
+      ,'raw':   quote & str & quote
       ,'error': false
     };
   }
@@ -425,16 +435,16 @@ component assessors='false' {
 
     if ( structKeyExists( variables.literals, identifier ) ) {
       return {
-        'type': variables.LITERAL
+        'type':   variables.LITERAL
         ,'value': variables.literals[ identifier ]
-        ,'raw': identifier
+        ,'raw':   identifier
         ,'error': false
       };
     }
     else {
       return {
-        'type': variables.IDENTIFIER
-        ,'name': identifier
+        'type':   variables.IDENTIFIER
+        ,'name':  identifier
         ,'error': false
       };
     }

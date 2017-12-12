@@ -10,7 +10,7 @@ Instead of coding specific filter behaviors and sorting flags we can instead use
 
 ## Example
 
-**URL Input**: _(Not URL encoded for human readibility)_
+**URL Input**: _(Not URL encoded for human readability)_
 
 `GET https://domain.tld/api/v1/resource?filter=title like "_Manager_" and active eq true&sort=name.dsc.nullsfirst&limit=20&offset=40&count=true`
 
@@ -44,23 +44,21 @@ _SQL clauses are built from URL strings assigned to specific URL parameters._
 
 ## Sorting
 
-_A comma seperated list of column expressions._
+_A comma separated list of column expressions._
 
 _ex:_ `state.asc,name,created_date.dsc.nullslast`
 
-**Column Expressions**
-
-Column expressions are `.` delimited strings, the "Column Name" is required while the direction and modifier is optional.
+**Column Expressions** are `.` delimited strings, the "Column Name" is required while the direction and modifier are optional.
 
 | Column Name | Directions | Modifiers |
 | --- | --- | --- |
-| `[\w]+` | asc,dsc,desc | nullsfirst, nullslast |
+| `[\w]+` | **asc**, desc, _dsc_  | nullsfirst, nullslast |
 
-*NOTE: The default direction is* `asc`
+_NOTE: The default direction is_ `asc`_, and_ `dsc` _is an alias for_ `desc`.
 
 ## Filtering
 
-_The filter expression is comprised of Logical and Binary expressions with a familar syntax to build SQL WHERE clauses._
+_The filter expression is comprised of Logical and Binary expressions with a familiar syntax to build SQL WHERE clauses._
 
 _ex:_ `rank gte 90 and ( status in "active,disabled,inactive" or edge_case eg true )`
 
@@ -83,7 +81,7 @@ _ex:_ `rank gte 90 and ( status in "active,disabled,inactive" or edge_case eg tr
 | lte | <= | Binary |
 | gte | >= | Binary |
 
-*NOTE: Supports nested paranthesis/expressions*
+*NOTE: Supports nested parenthesis/expressions*
 
 ## Module Configs
 
@@ -126,7 +124,7 @@ If you have any concerns that are not covered by the tests let's add them!
 - Standardize date format
   - DateValue eq 2012-12-03
   - DateTimeOffsetValue eq 2012-12-03T07:16:23Z
-- verfiy example output
+- verify example output
 
 **Low Priority**
 - Add LIKE ANY

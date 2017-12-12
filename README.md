@@ -48,6 +48,7 @@ TODO: add links
 TODO: columnWhiteList: {}
 TODO: columnBlackList: {}
 
+TODO: add open api parameter and return documentation
 TODO: prepend all error messages with url param
 TODO: Build Query Parameter struct for filter sql
 

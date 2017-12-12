@@ -6,7 +6,4 @@ component accessors='false' {
     return this;
   }
 
-  // TODO: add open api parameter and return documentation
-
-
 }

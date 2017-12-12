@@ -2,7 +2,7 @@
 
 _Squrll safely creates SQL clauses from a URL parameters_
 
-[![Master Branch Build Status](https://img.shields.io/travis/coryasilva/urlsql/master.svg?style=flat-square&label=master)](https://travis-ci.org/coryasilva/urlsql)
+[![Master Branch Build Status](https://img.shields.io/travis/coryasilva/squrrl/master.svg?style=flat-square&label=master)](https://travis-ci.org/coryasilva/squrrl)
 
 Instead of coding specific filter behaviors and sorting flags we can instead use a repeatable, configurable, and standard way to define filters, sorts, and paging.  This project was originally intended to work with legacy projects but could be used for new projects as well.
 

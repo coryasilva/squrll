@@ -1,5 +1,7 @@
 component {
 
+  property name='settings' inject='coldbox:modulesettings:squrll' getter='false' setter='false';
+
   variables.operators = {
     'or': 'OR'
     ,'and': 'AND'
@@ -23,19 +25,34 @@ component {
     return this;
   }
 
-  public string function filter( required struct tree ) {
+  public struct function filter( required struct tree ) {
+    var result = {
+      'sql': ''
+      ,'cfQueryParams': {}
+      ,'error': false
+      ,'errorMessages': []
+    };
+    var sqlPrepend = settings.filterIncludeWhere ? 'WHERE ': '';
     if ( tree.type == 'LogicalExpression' ) {
-      return ' WHERE ' & handleLogicalExpression( tree );
+      result.append( handleLogicalExpression( tree ) );
+      result.sql = sqlPrepend & result.sql;
     }
-    if ( tree.type == 'BinaryExpression' ) {
-      return ' WHERE ' & handleBinaryExpression( tree );
+    else if ( tree.type == 'BinaryExpression' ) {
+      result.append( handleLogicalExpression( tree ) );
+      result.sql = sqlPrepend & result.sql;
     }
-    return '';
+    else {
+      result.error = true;
+      result.errorMessages.append( '#settings.filterUrlParam#: Invalid tree' );
+    }
+
+    return result;
   }
 
-  private string function handleLogicalExpression( leaf ) {
+  private struct function handleLogicalExpression( required struct leaf ) {
     var sql = '';
-
+    var params = {};
+    var result = {};
     if ( leaf.type == 'LogicalExpression' ) {
 
       if ( leaf.left.type == 'LogicalExpression' ) {
@@ -64,25 +81,36 @@ component {
 
     }
 
-    return sql;
+    return { 'sql': sql, 'cfQueryParams': params };
   }
 
-  private string function handleBinaryExpression( leaf ) {
+  private struct function handleBinaryExpression(
+    required struct leaf
+    ,required struct params
+    ,struct whiteList
+    ,struct blackList
+  ) {
     var sql = '';
+    var param = {};
     if ( leaf.left.type == 'Identifier' ) {
       sql &= leaf.left.name & ' ';
     }
     if ( leaf.keyExists( 'operator' ) && variables.operators.keyExists( leaf.operator ) ) {
-      sql &= variables.operators[leaf.operator] & ' ';
+      sql &= variables.operators[ leaf.operator ] & ' ';
     }
     if ( leaf.right.type == 'Literal' ) {
+      // create param
+      // check whitelist for param type
+      // else infer type param
+      //
+
       sql &= leaf.right.raw & ' ';
     }
-    return sql;
+    return { 'sql': sql, 'param': param };
   }
 
   public string function range( required numeric offset, numeric limit ) {
-    if ( arguments.keyExists( limit ) ) {
+    if ( arguments.keyExists( 'limit' ) ) {
       return ' LIMIT #limit# OFFSET #offset# ';
     }
     return ' LIMIT ALL OFFSET #offset# ';
@@ -96,29 +124,28 @@ component {
     };
     var ignoreWhiteList = whiteList.isEmpty();
     var ignoreBlackList = blackList.isEmpty();
-    var sql = '';
+    var sql = ' ';
+    var columnCount = columns.len();
 
-    if ( columns.len() > 0 ) {
+    // An empty sort will result in an empty sql statement but not an array.
+    if ( columnCount > 0  && settings.sortIncludeOrderBy ) {
       sql = ' ORDER BY';
     }
 
-    columns.each( function ( expression ) {
+    columns.each( function ( expression, index ) {
       var column = sortColumn( expression, ignoreWhiteList, ignoreBlackList, whiteList, blackList );
       result.error = column.error ? column.error : result.error;
       result.errorMessages.append( column.errorMessages, true );
-      sql &= column.sort;
-      sql &= ',';
+      sql &= column.sql;
+      sql &= index < columnCount ? ',' : '';
     } );
 
-    // clean trailing comma
-    sql = right( sql, 1 ) == ',' ? left( sql, len( sql ) - 1 ) : sql;
-
-    if ( !result.error ) { result.sql = sql; }
+    if ( !result.error ) { result.sql = sql & ' '; }
 
     return result;
   }
 
-  private string function sortColumn(
+  private struct function sortColumn(
     required string expression
     ,required boolean ignoreWhiteList
     ,required boolean ignoreBlackList
@@ -128,7 +155,7 @@ component {
     var result = {
       'sql': ''
       ,'error': false
-      ,'errorMessage': ''
+      ,'errorMessages': []
     };
     var sorts = {
       'asc': 'ASC'
@@ -144,23 +171,23 @@ component {
     // Empty Item (edge case)
     if ( length < 1 ) {
       result.error = true;
-      result.errorMessages.append( 'Empty sort column!' );
+      result.errorMessages.append( '#settings.sortUrlParam#: Empty list!' );
     }
 
     // Sort Column
     if ( refind( '[^\w\.,]+', parts[ 1 ] ) ) {
       result.error = true;
-      result.errorMessages.append( 'Column "#parts[ 1 ]#" contains illegal characters.' );
+      result.errorMessages.append( '#settings.sortUrlParam#: Column "#parts[ 1 ]#" contains illegal characters.' );
     }
     else if (
-      ( !ignoreWhiteList && whiteList.keyExists( parts[ 1 ] ) ) ||
-      ( !ignoreBlackList && !blackList.keyExists( parts[ 1 ] ) )
+      ( ignoreWhiteList || whiteList.keyExists( parts[ 1 ] ) ) &&
+      ( ignoreBlackList || ( !blackList.keyExists( parts[ 1 ] ) || whiteList.keyExists( parts[ 1 ] ) ) )
     ) {
       result.sql &= ' #parts[ 1 ]#';
     }
     else {
       result.error = true;
-      result.errorMessages.append( 'Column "#parts[ 1 ]#" does not exist or is not allowed here.' );
+      result.errorMessages.append( '#settings.sortUrlParam#: Column "#parts[ 1 ]#" does not exist or is not allowed here.' );
     }
 
     // Sort direction
@@ -172,7 +199,7 @@ component {
     }
     else {
       result.error = true;
-      result.errorMessages.append( 'Invalid sort direction: "#parts[ 2 ]#"' );
+      result.errorMessages.append( '#settings.sortUrlParam#: Invalid direction "#parts[ 2 ]#"' );
     }
 
     // Null handling
@@ -182,14 +209,14 @@ component {
       }
       else {
         result.error = true;
-        result.errorMessages.append( 'Invalid sort modifier: "#parts[ 3 ]#"' );
+        result.errorMessages.append( '#settings.sortUrlParam#: Invalid modifier "#parts[ 3 ]#"' );
       }
     }
 
     // 4th+ params
     if ( parts.len() > 3 ) {
       result.error = true;
-      result.errorMessages.append( 'Sort column "#expression#" has too many parameter.' );
+      result.errorMessages.append( '#settings.sortUrlParam#: Column "#expression#" has too many parameter.' );
     }
 
     return result;

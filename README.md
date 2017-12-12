@@ -133,6 +133,5 @@ If you have any concerns that are not covered by the tests let's add them!
 - Add NOT ILIKE ANY
 - Add ANY
 - Add NOT ANY
-- add open api parameter and return documentation
 - operatorInclude: {}
 - operatorExclude: {}

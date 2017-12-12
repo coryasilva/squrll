@@ -15,7 +15,7 @@
     "description":"URL params to SQL clauses",
     "type":"modules",
     "dependencies":{
-        
+
     },
     "devDependencies":{
         "coldbox":"^4.3.0+188",
@@ -36,6 +36,6 @@
         "tests"
     ],
     "testbox":{
-        "runner":"http://localhost:56464/tests/runner.cfm"
+        "runner":"http://localhost:8888/tests/runner.cfm"
     }
 }

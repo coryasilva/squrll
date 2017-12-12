@@ -1,0 +1,15 @@
+{
+    "name":"dev",
+    "web":{
+        "http":{
+            "port":8888,
+            "enable":true
+        },
+        "rewrites":{
+            "enable":true
+        }
+    },
+    "app":{
+        "cfengine":"lucee@5.x"
+    }
+}

@@ -1,5 +1,7 @@
 component assessors='false' {
 
+  property name='settings' inject='coldbox:modulesettings:squrll' getter='false' setter='false';
+
   /**
    * The string expression that we are parsing
    */
@@ -77,7 +79,7 @@ component assessors='false' {
       return {
         'tree': ''
         ,'error': true
-        ,'errorMessage': 'Empty expression'
+        ,'errorMessage': '#settings.filterUrlParam#: Empty expression'
       };
     }
 
@@ -86,7 +88,7 @@ component assessors='false' {
       // If no expression
       if ( node.type != variables.BINARY_EXP && node.type != variables.LOGICAL_EXP ) {
         node.error = true;
-        node[ 'errorMessage' ] = 'Not an expression';
+        node[ 'errorMessage' ] = '#settings.filterUrlParam#: Not an expression';
       }
       return node;
     }
@@ -100,7 +102,7 @@ component assessors='false' {
   }
 
   private any function throwError( message, index ) {
-    var error = message & ' at character ' & index;
+    var error = '#settings.filterUrlParam#: #message# at character #index#';
     throw( error, 'Squrll' );
   }
 

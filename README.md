@@ -42,3 +42,20 @@ TODO: add links
 - oData
 - postgrest
 - pegjs
+
+## TODO
+
+TODO: columnWhiteList: {}
+TODO: columnBlackList: {}
+
+TODO: prepend all error messages with url param
+TODO: Build Query Parameter struct for filter sql
+
+TODO: operatorInclude: {}
+TODO: operatorExclude: {}
+TODO: Add LIKE ANY
+TODO: Add NOT LIKE ANY
+TODO: Add ILIKE ANY
+TODO: Add NOT ILIKE ANY
+TODO: Add ANY
+TODO: Add NOT ANY

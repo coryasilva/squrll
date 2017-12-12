@@ -1,51 +1,84 @@
 component accessors='false' {
 
-  property name="settings" inject="coldbox:modulesettings:squrll" getter="false" setter="false";
+  property name='settings' inject='coldbox:modulesettings:squrll' getter='false' setter='false';
+  property name='wirebox' inject='wirebox' getter='false' setter='false';
+  property name='Composer' inject='Composer';
 
   public Squrll function init() {
     return this;
   }
 
-  // TODO:
-  public struct function getSql( required struct urlParams, struct opts={} ) {
+  public struct function parse( required struct urlParams, struct opts={} ) {
     var params = matchParamNames( urlParams );
     var options = defaultOptions( opts );
 
+    var count = parseCount( params.count );
+    var filter = parseFilter( params.filter );
+    var sort = parseSort( params.sort );
+    var range = parseRange( params.limit, params.offset, options.allowNoLimit );
+
     var result = {
-      'count': getCountSql( params.count ).count
-      ,'filter': false
-      ,'sort': false
-      ,'range': false
+      'count': count.sql
+      ,'filter': filter.sql
+      ,'sort': sort.sql
+      ,'range': range.sql
       ,'error': false
       ,'errorMessages': []
     };
 
+    result.error = count.error ? count.error : result.error;
+    result.error = filter.error ? filter.error : result.error;
+    result.error = sort.error ? sort.error : result.error;
+    result.error = range.error ? range.error : result.error;
+
+    result.errorMessages
+      .append( count.errorMessages, true )
+      .append( filter.errorMessages, true )
+      .append( sort.errorMessages, true )
+      .append( range.errorMessages, true );
+
     return result
   }
 
-  // TODO:
-  public struct function getFilterSql( required string filter ) {
-    var result = {
-      'filter': false
+  public struct function parseCount( required string value ) {
+    var sql = '';
+
+    if ( len( value ) >= 1 && value != '0' && value != 'n' && value != 'false' ) {
+      sql = 'COUNT(*) OVER() AS _count';
+    }
+
+    return {
+      'sql': sql
       ,'error': false
       ,'errorMessages': []
     };
-    return result
   }
 
-  // TODO:
-  public struct function getSortSql( required string sort ) {
+  public struct function parseFilter( required string expression ) {
     var result = {
-      'sort': false
-      ,'error': false
+      'sql': ''
+      ,'error': ''
       ,'errorMessages': []
     };
-    return result
+    var Parser = wirebox.getInstance( 'Parser' );
+    var parserResult = Parser.parse( expression );
+
+    if ( parserResult.error ) {
+      result.error = parserResult.error;
+      result.errorMessages = parserResult.errorMessages
+      return result;
+    }
+
+    return Composer.filter( parserResult.tree );
   }
 
-  public struct function getRangeSql( string limit='', string offset='', boolean allowNoLimit=false ) {
+  public struct function parseSort( required string expression ) {
+    return Composer.sort( listToArray( expression, ',' ) );
+  }
+
+  public struct function parseRange( string limit='', string offset='', boolean allowNoLimit=false ) {
     var result = {
-      'range': ''
+      'sql': ''
       ,'error': false
       ,'errorMessages': []
     };
@@ -77,27 +110,13 @@ component accessors='false' {
 
     // If no limit allowed and offset was defined
     if ( allowNoLimt && !result.error && arguments.limit == '' && arguments.offset != '' ) {
-      result.range = composeRange( _offset );
+      result.range = Composer.range( _offset );
     }
     else {
-      result.range = composeRange( _offset, _limit );
+      result.range = Composer.range( _offset, _limit );
     }
 
     return result;
-  }
-
-  public struct function getCountSql( required string value ) {
-    var count = false;
-
-    if ( len( value ) >= 1 && value != '0' && value != 'n' && value != 'false' ) {
-      count = true;
-    }
-
-    return {
-      'count': count
-      ,'error': false
-      ,'errorMessages': []
-    };
   }
 
   private struct function defaultOptions( required struct options ) {
@@ -109,41 +128,23 @@ component accessors='false' {
 
   private struct function matchParamNames( required struct params ) {
     var defaults = {};
-    defaults[ settings.countUrlParam ] = '';
+    defaults[ settings.countUrlParam ]  = '';
     defaults[ settings.filterUrlParam ] = '';
-    defaults[ settings.sortUrlParam ] = '';
-    defaults[ settings.limitUrlParam ] = '';
+    defaults[ settings.sortUrlParam ]   = '';
+    defaults[ settings.limitUrlParam ]  = '';
     defaults[ settings.offsetUrlParam ] = '';
 
     defaults.append( params );
 
     var matchedParams = {
-      'count': params[ settings.countUrlParam ]
+      'count':   params[ settings.countUrlParam ]
       ,'filter': params[ settings.filterUrlParam ]
-      ,'sort': params[ settings.sortUrlParam ]
-      ,'limit': params[ settings.limitUrlParam ]
+      ,'sort':   params[ settings.sortUrlParam ]
+      ,'limit':  params[ settings.limitUrlParam ]
       ,'offset': params[ settings.offsetUrlParam ]
     };
 
     return matchedParams;
-  }
-
-  private string function composeRange( required numeric offset, numeric limit ) {
-    if ( arguments.keyExists( limit ) ) {
-      return ' LIMIT #limit# OFFSET #offset# ';
-    }
-    return ' LIMIT ALL OFFSET #offset# ';
-  }
-
-  private string function composeSort( required array columns ) {
-    var sql = ' ORDER BY ';
-    sql &= columns.each( parseSortColumn );
-    return sql;
-  }
-
-  private string function parseSortColumn( required string column ) {
-    var sql = '';
-    return sql;
   }
 
 }

@@ -1,12 +1,3 @@
-/**
- * All of the gobbles below will modify `index` as we move along
- * TODO: Add LIKE ANY
- * TODO: Add NOT LIKE ANY
- * TODO: Add ILIKE ANY
- * TODO: Add NOT ILIKE ANY
- * TODO: Add ANY
- * TODO: Add NOT ANY
- */
 component assessors='false' {
 
   /**
@@ -84,7 +75,8 @@ component assessors='false' {
     // If empty expression early return
     if ( len( variables.expression ) == 0 ) {
       return {
-        'error': true
+        'tree': ''
+        ,'error': true
         ,'errorMessage': 'Empty expression'
       };
     }
@@ -100,7 +92,8 @@ component assessors='false' {
     }
     catch ( Squrll error ) {
       return {
-        'error': true
+        'tree': ''
+        ,'error': true
         ,'errorMessage': error.message
       };
     }

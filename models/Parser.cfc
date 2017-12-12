@@ -46,13 +46,9 @@ component assessors='false' {
     ,'ilike':  3
     ,'nilike': 3
     ,'lt':     4
-    ,'nlt':    4
     ,'gt':     4
-    ,'ngt':    4
     ,'lte':    4
-    ,'nlte':   4
     ,'gte':    4
-    ,'ngte':   4
   };
 
   /**
@@ -88,7 +84,7 @@ component assessors='false' {
       // If no expression
       if ( node.type != variables.BINARY_EXP && node.type != variables.LOGICAL_EXP ) {
         node.error = true;
-        node[ 'errorMessage' ] = '#settings.filterUrlParam#: Not an expression';
+        node[ 'errorMessage' ] = '#settings.filterUrlParam#: Invalid expression';
       }
       return node;
     }
@@ -168,13 +164,17 @@ component assessors='false' {
     return asc( exprI( index ) );
   }
 
+  private boolean function isSpace( ch ) {
+    //return ( ch == 32 || ch == 9 || ch == 10 || ch == 13 );
+    return ch == 32;
+  }
   /**
    *  Push `index` up to the next non-space character
    */
   private void function gobbleSpaces() {
     var ch = exprICode( index );
     // space or tab
-    while (ch == 32 || ch == 9 || ch == 10 || ch == 13) {
+    while ( isSpace( ch ) ) {
       ch = exprICode( ++index );
     }
   }
@@ -200,6 +200,9 @@ component assessors='false' {
     var tcLen = len( toCheck );
     while ( tcLen > 0 ) {
       if ( structKeyExists( variables.operators, toCheck ) ) {
+        if ( !isSpace( exprICode( index + tcLen ) ) ) {
+          throwError( 'Invalid operator', index );
+        }
         index += tcLen;
         return toCheck;
       }

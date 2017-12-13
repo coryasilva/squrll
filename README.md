@@ -1,4 +1,4 @@
-# Squrll
+# <img src="logo.png" height="48px" /> Squrll
 
 _Squrll safely creates SQL clauses from a URL parameters_
 

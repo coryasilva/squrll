@@ -20,6 +20,7 @@ component accessors='false' {
     var result = {
       'count': count.sql
       ,'filter': filter.sql
+      ,'queryParams': filter.queryParams
       ,'sort': sort.sql
       ,'range': range.sql
       ,'error': false
@@ -37,29 +38,33 @@ component accessors='false' {
       .append( sort.errorMessages, true )
       .append( range.errorMessages, true );
 
-    return result
+    return result;
   }
 
-  public struct function parseCount( required string value ) {
-    var sql = '';
-
-    if ( len( value ) >= 1 && value != '0' && value != 'n' && value != 'false' ) {
-      sql = 'COUNT(*) OVER() AS _count';
-    }
-
-    return {
-      'sql': sql
+  public struct function parseCount( string value='' ) {
+    var result = {
+      'sql': ''
       ,'error': false
       ,'errorMessages': []
     };
+
+    if ( value == 'true' ) {
+      result.sql = 'COUNT(*) OVER() AS _count';
+    }
+
+    return result;
   }
 
-  public struct function parseFilter( required string expression ) {
+  public struct function parseFilter( string expression='' ) {
     var result = {
       'sql': ''
-      ,'error': ''
+      ,'queryParams': {}
+      ,'error': false
       ,'errorMessages': []
     };
+
+    if ( expression == '' ) { return result; }
+
     var Parser = wirebox.getInstance( 'Parser' );
     var parserResult = Parser.parse( expression );
 
@@ -72,11 +77,17 @@ component accessors='false' {
     return Composer.filter( parserResult.tree );
   }
 
-  public struct function parseSort( required string expression ) {
+  public struct function parseSort( string expression='' ) {
+    var result = {
+      'sql': ''
+      ,'error': false
+      ,'errorMessages': []
+    };
+    if ( expression == '' ) { return result; }
     return Composer.sort( listToArray( expression, ',' ) );
   }
 
-  public struct function parseRange( string limit='', string offset='', boolean allowNoLimit=false ) {
+  public struct function parseRange( string offset='', string limit='', boolean allowNoLimit=false ) {
     var result = {
       'sql': ''
       ,'error': false
@@ -137,11 +148,11 @@ component accessors='false' {
     defaults.append( params );
 
     var matchedParams = {
-      'count':   params[ settings.countUrlParam ]
-      ,'filter': params[ settings.filterUrlParam ]
-      ,'sort':   params[ settings.sortUrlParam ]
-      ,'limit':  params[ settings.limitUrlParam ]
-      ,'offset': params[ settings.offsetUrlParam ]
+      'count':   defaults[ settings.countUrlParam ]
+      ,'filter': defaults[ settings.filterUrlParam ]
+      ,'sort':   defaults[ settings.sortUrlParam ]
+      ,'limit':  defaults[ settings.limitUrlParam ]
+      ,'offset': defaults[ settings.offsetUrlParam ]
     };
 
     return matchedParams;

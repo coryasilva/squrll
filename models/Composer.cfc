@@ -28,7 +28,7 @@ component {
   public struct function filter( required struct tree ) {
     var result = {
       'sql': ''
-      ,'cfQueryParams': {}
+      ,'queryParams': {}
       ,'error': false
       ,'errorMessages': []
     };
@@ -81,7 +81,7 @@ component {
 
     }
 
-    return { 'sql': sql, 'cfQueryParams': params };
+    return { 'sql': sql, 'queryParams': params };
   }
 
   private struct function handleBinaryExpression(
@@ -124,13 +124,8 @@ component {
     };
     var ignoreWhiteList = whiteList.isEmpty();
     var ignoreBlackList = blackList.isEmpty();
-    var sql = ' ';
+    var sql = settings.sortIncludeOrderBy ? ' ORDER BY': ' ';
     var columnCount = columns.len();
-
-    // An empty sort will result in an empty sql statement but not an array.
-    if ( columnCount > 0  && settings.sortIncludeOrderBy ) {
-      sql = ' ORDER BY';
-    }
 
     columns.each( function ( expression, index ) {
       var column = sortColumn( expression, ignoreWhiteList, ignoreBlackList, whiteList, blackList );

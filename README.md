@@ -11,7 +11,7 @@ _Squrll safely creates SQL clauses from URL parameters_
 **Step2: Squrll Output**: _(controller)_
 
 ```java
-Squrll.parse( URL );
+var result = Squrll.parse( URL );
 {
    'count': ' COUNT(*) OVER() AS _count '
   ,'filter': ' WHERE (title LIKE "_Manager_" AND active = TRUE) '

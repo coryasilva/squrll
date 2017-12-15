@@ -1,32 +1,61 @@
 # <img src="logo.png" height="48px" /> Squrll
 
-_Squrll safely creates SQL clauses from a URL parameters_
+_Squrll safely creates SQL clauses from URL parameters_
 
 [![Master Branch Build Status](https://img.shields.io/travis/coryasilva/squrll/master.svg?style=flat-square&label=master)](https://travis-ci.org/coryasilva/squrll)
 
-Instead of coding specific filter behaviors and sorting flags we can instead use a repeatable, configurable, and standard way to define filters, sorts, and paging.  This project was originally intended to work with legacy projects but could be used for new projects as well.
-
-**CURRENTLY BUILT FOR POSTGRES** _(though, easily extendable)_
-
-## Example
-
-**URL Input**: _(Not URL encoded for human readability)_
+**Step1: URL Input**: _(Not URL encoded for human readability)_
 
 `GET https://domain.tld/api/v1/resource?filter=title like "_Manager_" and active eq true&sort=name.dsc.nullsfirst&limit=20&offset=40&count=true`
 
-**Squrll Output**:
+**Step2: Squrll Output**: _(controller)_
 
 ```java
 Squrll.parse( URL );
 {
-   'count |  COUNT(*) OVER() AS _count '
-  ,'filter |  WHERE (title LIKE "_Manager_" AND active = TRUE) '
-  ,'sort |  ORDER BY name DESC NULLS FIRST '
-  ,'range |  LIMIT 20 OFFSET 40 '
+   'count': ' COUNT(*) OVER() AS _count '
+  ,'filter': ' WHERE (title LIKE "_Manager_" AND active = TRUE) '
+  ,'queryParams': {...}
+  ,'sort': ' ORDER BY name DESC NULLS FIRST '
+  ,'range': ' LIMIT 20 OFFSET 40 '
   ,'error': false
   ,'errorMessages': []
 }
 ```
+
+**Step#: Build Query**
+
+```java
+public query function getStuff(
+  required string tenantID
+  ,required struct squrll
+) {
+  var sql = '
+      SELECT
+        stuff_id
+        ,stuff_name
+        ,stuff_value
+      FROM stuff
+      WHERE tenant_id = :tenantID
+  ';
+  sql &= squrll.filter;
+  sql &= squrll.sort;
+  sql &= squrll.range;
+
+  var params = {
+    tenantID: { value: arguments.tenantID, cfsqltype: 'cf_sql_integer' }
+  };
+  params.append( squrll.queryParams );
+
+  return queryExecute( sql, params );
+}
+```
+
+## Why
+
+Instead of coding specific filter behaviors and sorting flags we can instead use a repeatable, configurable, and standard way to define filters, sorts, and paging.  This project was originally intended to work with legacy projects but could be used for new projects as well.
+
+**CURRENTLY BUILT FOR POSTGRES** _(though, easily extendable)_
 
 ## URL Parameters
 

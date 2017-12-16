@@ -69,24 +69,27 @@ component assessors='false' {
     variables.expression = arguments.expression;
     variables.index = 1;
     variables.length = len( arguments.expression );
+    var result = {
+      'tree': {}
+      ,'error': false
+      ,'errorMessages': []
+    };
 
     // If empty expression early return
     if ( len( variables.expression ) == 0 ) {
-      return {
-        'tree': ''
-        ,'error': true
-        ,'errorMessage': '#settings.filterUrlParam#: Empty expression'
-      };
+      result.error = true;
+      result.errorMessages.append( '#settings.filterUrlParam#: Empty expression' );
+      return result;
     }
 
     try {
-      var node = gobbleExpression();
+      result.tree = gobbleExpression();
       // If no expression
-      if ( node.type != variables.BINARY_EXP && node.type != variables.LOGICAL_EXP ) {
-        node.error = true;
-        node[ 'errorMessage' ] = '#settings.filterUrlParam#: Invalid expression';
+      if ( result.tree.type != variables.BINARY_EXP && result.tree.type != variables.LOGICAL_EXP ) {
+        result.error = true;
+        result.errorMessages.append( '#settings.filterUrlParam#: Invalid expression' );
       }
-      return node;
+      return result;
     }
     catch ( Squrll error ) {
       return {

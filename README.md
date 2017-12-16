@@ -14,7 +14,7 @@ _Squrll safely creates SQL clauses from URL parameters_
 var result = Squrll.parse( URL );
 {
    'count': ' COUNT(*) OVER() AS _count '
-  ,'filter': ' WHERE (title LIKE "_Manager_" AND active = TRUE) '
+  ,'filter': ' AND ( title LIKE "_Manager_" AND active = TRUE ) '
   ,'queryParams': {...}
   ,'sort': ' ORDER BY name DESC NULLS FIRST '
   ,'range': ' LIMIT 20 OFFSET 40 '
@@ -26,15 +26,9 @@ var result = Squrll.parse( URL );
 **Step#: Build Query**
 
 ```java
-public query function getStuff(
-  required string tenantID
-  ,required struct squrll
-) {
+function getStuff( tenantID, squrll ) {
   var sql = '
-      SELECT
-        stuff_id
-        ,stuff_name
-        ,stuff_value
+      SELECT id, name, value
       FROM stuff
       WHERE tenant_id = :tenantID
   ';

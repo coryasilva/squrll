@@ -15,7 +15,7 @@ component accessors='false' {
     var count = parseCount( params.count );
     var filter = parseFilter( params.filter );
     var sort = parseSort( params.sort );
-    var range = parseRange( params.limit, params.offset, options.allowNoLimit );
+    var range = parseRange( params.offset, params.limit, options.allowNoLimit );
 
     var result = {
       'count': count.sql
@@ -49,7 +49,7 @@ component accessors='false' {
     };
 
     if ( value == 'true' ) {
-      result.sql = 'COUNT(*) OVER() AS _count';
+      result.sql = ' COUNT(*) OVER() AS _count ';
     }
 
     return result;
@@ -73,8 +73,9 @@ component accessors='false' {
       result.errorMessages = parserResult.errorMessages
       return result;
     }
+    result = Composer.filter( parserResult.tree );
 
-    return Composer.filter( parserResult.tree );
+    return result;
   }
 
   public struct function parseSort( string expression='' ) {
@@ -95,13 +96,13 @@ component accessors='false' {
     };
 
     // Early return if no limit and offset was supplied
-    if ( arguments.limit == '' && arguments.offset == '' ) {
+    if ( arguments.offset == '' && arguments.limit == '' ) {
       return result;
     }
 
     // Offset
     var _offset = 0;
-    if ( arguments.offset != '' && reMatch('[0-9]+', arguments.offset ) ) {
+    if ( arguments.offset != '' && refind('[^0-9]', arguments.offset ) == 0 ) {
       _offset = LSParseNumber( arguments.offset );
     }
     else {
@@ -111,7 +112,7 @@ component accessors='false' {
 
     // Limit
     var _limit = settings.defaultLimit;
-    if ( arguments.limit != '' && reMatch('[0-9]+', arguments.limit ) ) {
+    if ( arguments.limit != '' && refind('[^0-9]', arguments.limit ) == 0 ) {
       _limit = LSParseNumber( arguments.limit );
     }
     else {
@@ -120,11 +121,11 @@ component accessors='false' {
     }
 
     // If no limit allowed and offset was defined
-    if ( allowNoLimt && !result.error && arguments.limit == '' && arguments.offset != '' ) {
-      result.range = Composer.range( _offset );
+    if ( allowNoLimit && !result.error && arguments.offset != '' && arguments.limit == '' ) {
+      result.sql = Composer.range( _offset );
     }
     else {
-      result.range = Composer.range( _offset, _limit );
+      result.sql = Composer.range( _offset, _limit );
     }
 
     return result;

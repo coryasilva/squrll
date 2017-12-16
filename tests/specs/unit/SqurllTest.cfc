@@ -1,24 +1,36 @@
 component extends="testbox.system.BaseSpec" {
 
   function beforeAll() {
-    // Create target mock object
-    mock = prepareMock( createObject( 'component', 'models.Squrll' ) );
-
-    // Create mock settings
-    var settings = {
+    var mockSettings = {
       countUrlParam:       'count'
       ,filterUrlParam:     'filter'
       ,sortUrlParam:       'sort'
       ,limitUrlParam:      'limit'
       ,offsetUrlParam:     'offset'
-      ,filterIncludeWhere: true
-      ,sortIncludeOrderBy: true
+      ,filterPrepend:      'AND'
+      ,sortPrepend:        'ORDER BY'
       ,defaultLimit:       20
       ,allowNoLimit:       false
       ,columnWhiteList:    {}
       ,columnBlackList:    {}
+      ,ignoreEmptyWhiteList: true
     };
-    mock.$property( 'settings', 'variables', settings );
+    // Create target mock object
+
+    mockComposer = prepareMock( createObject( 'component', 'models.Composer' ) );
+    mockComposer.$property( 'settings', 'variables', mockSettings );
+    mockComposer.init();
+
+    mockParser = prepareMock( createObject( 'component', 'models.Parser' ) );
+    mockParser.$property( 'settings', 'variables', mockSettings );
+
+    mockWirebox = createStub().$( 'getInstance', mockParser.init() );
+
+    mock = prepareMock( createObject( 'component', 'models.Squrll' ) );
+    mock.$property( 'settings', 'variables', mockSettings );
+    mock.$property( 'wirebox', 'variables', mockWirebox );
+    mock.$property( 'Composer', 'variables', mockComposer );
+
     mock.init();
   }
 
@@ -36,7 +48,7 @@ component extends="testbox.system.BaseSpec" {
       it( 'can parse a URL struct', function () {
         var test = mock.parse( mockURL );
         expect( test.count ).toBe( ' COUNT(*) OVER() AS _count ' );
-        expect( test.filter ).toBe( ' WHERE name ILIKE "cory" ' );
+        expect( test.filter ).toBe( ' AND name ILIKE "cory" ' );
         expect( test.sort ).toBe( ' ORDER BY rank DESC, state ASC NULLS FIRST ' );
         expect( test.range ).toBe( ' LIMIT 20 OFFSET 40 ' );
         expect( test.error ).toBeFalse();

@@ -11,12 +11,13 @@ component extends="testbox.system.BaseSpec" {
       ,sortUrlParam:       'sort'
       ,limitUrlParam:      'limit'
       ,offsetUrlParam:     'offset'
-      ,filterIncludeWhere: true
-      ,sortIncludeOrderBy: true
+      ,filterPrepend:      'AND'
+      ,sortPrepend:        'ORDER BY'
       ,defaultLimit:       20
       ,allowNoLimit:       false
       ,columnWhiteList:    {}
       ,columnBlackList:    {}
+      ,ignoreEmptyWhiteList: true
     };
     mock.$property( 'settings', 'variables', settings );
 

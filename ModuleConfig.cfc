@@ -11,12 +11,13 @@ component {
       ,sortUrlParam:       'sort'   // Name of the URL parameter
       ,limitUrlParam:      'limit'  // Name of the URL parameter
       ,offsetUrlParam:     'offset' // Name of the URL parameter
-      ,filterIncludeWhere: true     // Include `WHERE` in the filter sql clause
-      ,sortIncludeOrderBy: true     // Include `ORDER BY` in the sort sql clause
+      ,filterPrepend:      'AND'    // Include `AND` or `WHERE` in the filter sql clause
+      ,sortPrepend:        'ORDER BY' // Include `ORDER BY` in the sort sql clause
       ,defaultLimit:       20       // Default record limit when not defined, ignored if allowNoLimit is true
       ,allowNoLimit:       false    // Allow unlimited rows to be returned
       ,columnWhiteList:    {}       // Only allow these columns on all requests
       ,columnBlackList:    {}       // Do not allow these columns on all requests
+      ,ignoreEmptyWhiteList: true   // Ignore the white list if it is empty; a false value will always force the use of a whitelist
     };
   }
 }

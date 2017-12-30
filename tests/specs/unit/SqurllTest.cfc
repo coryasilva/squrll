@@ -2,23 +2,25 @@ component extends="testbox.system.BaseSpec" {
 
   function beforeAll() {
     var mockSettings = {
-      countUrlParam:       'count'
-      ,filterUrlParam:     'filter'
-      ,sortUrlParam:       'sort'
-      ,limitUrlParam:      'limit'
-      ,offsetUrlParam:     'offset'
-      ,filterPrepend:      'AND'
-      ,sortPrepend:        'ORDER BY'
-      ,defaultLimit:       20
-      ,allowNoLimit:       false
-      ,columnWhiteList:    {}
-      ,columnBlackList:    {}
-      ,ignoreEmptyWhiteList: true
+      countUrlParam:   'count'
+      ,filterUrlParam: 'filter'
+      ,sortUrlParam:   'sort'
+      ,limitUrlParam:  'limit'
+      ,offsetUrlParam: 'offset'
+      ,filterPrepend:  'AND'
+      ,sortPrepend:    'ORDER BY'
+      ,defaultLimit:   20
+      ,allowNoLimit:   false
+      ,columnTypes:    {}
     };
     // Create target mock object
 
+    mockValidator = prepareMock( createObject( 'component', 'models.Validator' ) );
+    mockValidator.init();
+
     mockComposer = prepareMock( createObject( 'component', 'models.Composer' ) );
     mockComposer.$property( 'settings', 'variables', mockSettings );
+    mockComposer.$property( 'Validator', 'variables', mockValidator );
     mockComposer.init();
 
     mockParser = prepareMock( createObject( 'component', 'models.Parser' ) );
@@ -46,9 +48,17 @@ component extends="testbox.system.BaseSpec" {
         ,'extra': 'blah'
       };
       it( 'can parse a URL struct', function () {
-        var test = mock.parse( mockURL );
+        var test = mock.parse(
+          mockURL
+          ,{
+           'name':'cf_sql_varchar'
+           ,'rank': 'cf_sql_integer'
+           ,'state': 'cf_sql_varchar'
+          }
+        );
+        //dump( test );
         expect( test.count ).toBe( ' COUNT(*) OVER() AS _count ' );
-        expect( test.filter ).toBe( ' AND name ILIKE "cory" ' );
+        expect( test.filter ).toBe( ' AND name ILIKE :squrll_name ' );
         expect( test.sort ).toBe( ' ORDER BY rank DESC, state ASC NULLS FIRST ' );
         expect( test.range ).toBe( ' LIMIT 20 OFFSET 40 ' );
         expect( test.error ).toBeFalse();

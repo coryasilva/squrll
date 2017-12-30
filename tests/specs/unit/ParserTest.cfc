@@ -6,18 +6,16 @@ component extends="testbox.system.BaseSpec" {
     mock.init();
     // Create mock settings
     var settings = {
-      countUrlParam:       'count'
-      ,filterUrlParam:     'filter'
-      ,sortUrlParam:       'sort'
-      ,limitUrlParam:      'limit'
-      ,offsetUrlParam:     'offset'
-      ,filterPrepend:      'AND'
-      ,sortPrepend:        'ORDER BY'
-      ,defaultLimit:       20
-      ,allowNoLimit:       false
-      ,columnWhiteList:    {}
-      ,columnBlackList:    {}
-      ,ignoreEmptyWhiteList: true
+      countUrlParam:   'count'
+      ,filterUrlParam: 'filter'
+      ,sortUrlParam:   'sort'
+      ,limitUrlParam:  'limit'
+      ,offsetUrlParam: 'offset'
+      ,filterPrepend:  'AND'
+      ,sortPrepend:    'ORDER BY'
+      ,defaultLimit:   20
+      ,allowNoLimit:   false
+      ,columnTypes:    {}
     };
     mock.$property( 'settings', 'variables', settings );
 
@@ -25,10 +23,6 @@ component extends="testbox.system.BaseSpec" {
   function run() {
     //expression = '(a gte .1 and (b neq 0 or c in "a,b,c" or d in "-1,2,3") or e like "_blah_") and f lt -5';
     //expression = '(a gte .3 and b lt 2) and c lt 1';
-
-    describe( 'Parser Operator Precendence', function () {
-
-    } );
 
     describe( 'Parser Error Handling', function () {
 

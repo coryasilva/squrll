@@ -39,30 +39,6 @@ component extends="testbox.system.BaseSpec" {
   function run() {
 
     describe( 'Squrll', function () {
-      var mockURL = {
-        'count': 'true'
-        ,'filter':'name ilike "cory"'
-        ,'sort': 'rank.desc,state.asc.nullsfirst'
-        ,'offset': '40'
-        ,'limit': '20'
-        ,'extra': 'blah'
-      };
-      it( 'can parse a URL struct', function () {
-        var test = mock.parse(
-          mockURL
-          ,{
-           'name':'cf_sql_varchar'
-           ,'rank': 'cf_sql_integer'
-           ,'state': 'cf_sql_varchar'
-          }
-        );
-        //dump( test );
-        expect( test.count ).toBe( ' COUNT(*) OVER() AS _count ' );
-        expect( test.filter ).toBe( ' AND name ILIKE :squrll_name ' );
-        expect( test.sort ).toBe( ' ORDER BY rank DESC, state ASC NULLS FIRST ' );
-        expect( test.range ).toBe( ' LIMIT 20 OFFSET 40 ' );
-        expect( test.error ).toBeFalse();
-      } );
 
       it( 'will not fail on empty struct', function () {
         var test =  mock.parse( {} );
@@ -74,7 +50,58 @@ component extends="testbox.system.BaseSpec" {
         expect( test.errorMessages ).toBeArray();
         expect( test.queryParams ).toBeStruct();
       } );
-    } );
 
+      it( 'can verify the example', function () {
+        var mockURL = {
+          'count': 'true'
+          ,'filter':'title like "_Manager_" and active eq true'
+          ,'sort': 'name.dsc.nullsfirst'
+          ,'offset': '40'
+          ,'limit': '20'
+        };
+        var test = mock.parse(
+          mockURL
+          ,{
+           'name':'cf_sql_varchar'
+           ,'title': 'cf_sql_varchar'
+           ,'active': 'cf_sql_boolean'
+          }
+        );
+        expect( test.count ).toBe( ' COUNT(*) OVER() AS _count ' );
+        expect( test.filter ).toBe( ' AND title LIKE :squrll_title AND active = :squrll_active ' );
+        expect( test.queryParams ).toBe( {
+          'squrll_title': { 'cfsqltype': 'cf_sql_varchar' }
+          ,'squrll_active':  { 'cfsqltype': 'cf_sql_varchar' }
+        } );
+        expect( test.sort ).toBe( ' ORDER BY name DESC NULLS FIRST ' );
+        expect( test.range ).toBe( ' LIMIT 20 OFFSET 40 ' );
+        expect( test.error ).toBeFalse();
+      } );
+
+      it( 'can parse a URL struct with extra data', function () {
+        var mockURL = {
+          'count': 'true'
+          ,'filter':'name ilike "cory"'
+          ,'sort': 'rank.desc,state.asc.nullsfirst'
+          ,'offset': '40'
+          ,'limit': '20'
+          ,'extra': 'blah'
+        };
+        var test = mock.parse(
+          mockURL
+          ,{
+           'name':'cf_sql_varchar'
+           ,'rank': 'cf_sql_integer'
+           ,'state': 'cf_sql_varchar'
+          }
+        );
+        expect( test.count ).toBe( ' COUNT(*) OVER() AS _count ' );
+        expect( test.filter ).toBe( ' AND name ILIKE :squrll_name ' );
+        expect( test.sort ).toBe( ' ORDER BY rank DESC, state ASC NULLS FIRST ' );
+        expect( test.range ).toBe( ' LIMIT 20 OFFSET 40 ' );
+        expect( test.error ).toBeFalse();
+      } );
+
+    } );
   }
 }

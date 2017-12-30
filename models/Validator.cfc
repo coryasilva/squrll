@@ -31,6 +31,7 @@ component {
       ,'clob':         '' // Not Implemented
       ,'idstamp':      '' // Not Implemented
       ,'tinyint':      '' // Not Implemented
+      ,'boolean':      '_isBoolean' // Not part of cfml spec but useful with postgres
     };
     var type = replace( cfsqltype, 'cf_sql_', '' );
     var method = map[ type ]
@@ -90,8 +91,9 @@ component {
   }
 
   public boolean function _isBoolean( required string value ) {
-    value = '_#value#';  // Damn you coldfusion!
-    return value == '_true' || value == '_false';
+    value = '_' & value;
+    var bools = [ '_t','_true','_y','_yes','_on','_1','_f','_false','_n','_no','_off','_0' ];
+    return bools.findNoCase( value ) != 0;
   }
 
   public boolean function _isNull( required string value ) {

@@ -144,7 +144,7 @@ component {
 
     if ( leaf.right.type == 'Literal' ) {
       var paramName = uniqueKey( 'squrll_' & leaf.left.name, result.queryParams );
-      var paramConfig = { 'cfsqltype': columnTypes[ leaf.left.name ] };
+      var paramConfig = { 'cfsqltype': transformCfSqlType( columnTypes[ leaf.left.name ] ) };
 
       if ( Validator._isNull( leaf.right.raw ) ) {
         paramConfig['null'] = true;
@@ -158,6 +158,14 @@ component {
       result.sql &= ':#paramName# ';
     }
     return result;
+  }
+
+  public string function transformCfSqlType( required string type ) {
+    var test = replace( type, 'cf_sql_', '' );
+    if ( test == 'boolean' ) {
+      return 'cf_sql_varchar';
+    }
+    return type;
   }
 
   public string function uniqueKey( required string key, required struct map ) {

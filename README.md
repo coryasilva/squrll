@@ -22,8 +22,11 @@ var result = Squrll.parse( URL, columnTypes );
 // result equals
 {
    'count': ' COUNT(*) OVER() AS _count '
-  ,'filter': ' AND ( title LIKE "_Manager_" AND active = TRUE ) '
-  ,'queryParams': {...}
+  ,'filter': ' AND title LIKE "_Manager_" AND active = TRUE '
+  ,'queryParams': {
+    'squrll_title': { 'cfsqltype': 'cf_sql_varchar' }
+    ,'squrll_active':  { 'cfsqltype': 'cf_sql_varchar' }
+  }
   ,'sort': ' ORDER BY name DESC NULLS FIRST '
   ,'range': ' LIMIT 20 OFFSET 40 '
   ,'error': false
@@ -194,7 +197,6 @@ If you have any concerns that are not covered by the tests let's add them!
 
 ## TODO
 
-- Verify example output
 - Add more test coverage for the Composer.cfc
 - Add more test coverage for order of operations in the Squrll.cfc
 - Add more test coverage for sql injection in the Squrll.cfc, Parser.cfc, and Composer.cfc
@@ -208,5 +210,6 @@ If you have any concerns that are not covered by the tests let's add them!
   - `ANY`
   - `NOT ANY`
   - `ALL`
-- Consider allowing some operators to be disabled: `settings.disabledOperators: {}`
 - Vet the implementation of `count`
+- Consider allowing some operators to be disabled: `settings.disabledOperators: {}`
+- Consider using cb-validator to further confine literals

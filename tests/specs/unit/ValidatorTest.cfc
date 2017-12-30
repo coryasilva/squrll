@@ -110,15 +110,18 @@ component extends="testbox.system.BaseSpec" {
 
       it( 'can validate Boolean', function () {
         expect( mock._isBoolean( 'true' ) ).toBeTrue();
-        expect( mock._isBoolean( 'True' ) ).toBeTrue();
         expect( mock._isBoolean( 'TRUE' ) ).toBeTrue();
         expect( mock._isBoolean( 'false' ) ).toBeTrue();
-        expect( mock._isBoolean( 'False' ) ).toBeTrue();
         expect( mock._isBoolean( 'FALSE' ) ).toBeTrue();
-        expect( mock._isBoolean( '' ) ).toBeFalse();
-        expect( mock._isBoolean( '1' ) ).toBeFalse();
-        expect( mock._isBoolean( 'Yes' ) ).toBeFalse();
-        expect( mock._isBoolean( 'On' ) ).toBeFalse();
+        expect( mock._isBoolean( 't' ) ).toBeTrue();
+        expect( mock._isBoolean( 'f' ) ).toBeTrue();
+        expect( mock._isBoolean( 'y' ) ).toBeTrue();
+        expect( mock._isBoolean( 'n' ) ).toBeTrue();
+        expect( mock._isBoolean( 'on' ) ).toBeTrue();
+        expect( mock._isBoolean( 'off' ) ).toBeTrue();
+        expect( mock._isBoolean( '1' ) ).toBeTrue();
+        expect( mock._isBoolean( '0' ) ).toBeTrue();
+        expect( mock._isBoolean( '2' ) ).toBeFalse();
       } );
 
       it( 'can validate null', function () {

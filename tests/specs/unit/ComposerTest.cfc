@@ -3,30 +3,28 @@ component extends="testbox.system.BaseSpec" {
   function beforeAll() {
     // Create target mock object
     mock = prepareMock( createObject( 'component', 'models.Composer' ) );
-    mock.init();
+    mockValidator = prepareMock( createObject( 'component', 'models.Validator' ) );
+    mockValidator.init();
+
     // Create mock settings
     var settings = {
-      countUrlParam:       'count'
-      ,filterUrlParam:     'filter'
-      ,sortUrlParam:       'sort'
-      ,limitUrlParam:      'limit'
-      ,offsetUrlParam:     'offset'
-      ,filterPrepend:      'AND'
-      ,sortPrepend:        'ORDER BY'
-      ,defaultLimit:       20
-      ,allowNoLimit:       false
-      ,columnWhiteList:    {}
-      ,columnBlackList:    {}
-      ,ignoreEmptyWhiteList: true
+      countUrlParam:   'count'
+      ,filterUrlParam: 'filter'
+      ,sortUrlParam:   'sort'
+      ,limitUrlParam:  'limit'
+      ,offsetUrlParam: 'offset'
+      ,filterPrepend:  'AND'
+      ,sortPrepend:    'ORDER BY'
+      ,defaultLimit:   20
+      ,allowNoLimit:   false
+      ,columnTypes:    {}
     };
     mock.$property( 'settings', 'variables', settings );
-
+    mock.$property( 'Validator', 'variables', mockValidator );
+    mock.init();
   }
+
   function run() {
-
-    describe( 'Composer Filter', function () {
-
-    } );
 
     describe( 'Composer Range', function () {
       it( 'can take a empty limit', function () {
@@ -40,27 +38,26 @@ component extends="testbox.system.BaseSpec" {
     describe( 'Composer Sort', function () {
       it( 'can sort by multiple columns', function () {
         expect(
-          mock.sort( ['state.asc', 'name', 'created_date.dsc.nullslast', 'blah.desc.nullsfirst' ] ).sql
+          mock.sort(
+            ['state.asc', 'name', 'created_date.dsc.nullslast', 'blah.desc.nullsfirst' ]
+           ,{ 'state':true, 'name':true, 'created_date':true, 'blah':true } ).sql
         ).toBe( ' ORDER BY state ASC, name ASC, created_date DESC NULLS LAST, blah DESC NULLS FIRST ' );
       } );
       it( 'can catch invalid direction', function () {
-        expect( mock.sort( [ 'state.random' ] ).error ).toBeTrue();
+        expect( mock.sort( [ 'state.random' ], { 'state':true } ).error ).toBeTrue();
       } );
       it( 'can catch invalid modifier', function () {
-        expect( mock.sort( [ 'state.asc.nullsmiddle' ] ).error ).toBeTrue();
+        expect( mock.sort( [ 'state.asc.nullsmiddle' ], { 'state':true } ).error ).toBeTrue();
       } );
-      it( 'can whiteList columns', function () {
-        expect( mock.sort( [ 'state.asc' ], { 'state':true } ).error ).toBeFalse();
-        expect( mock.sort( [ 'name.asc' ], { 'state':true } ).error ).toBeTrue();
-      } );
-        it( 'can blackList columns', function () {
-        expect( mock.sort( [ 'state.asc' ], {}, { 'state':true } ).error ).toBeTrue();
-        expect( mock.sort( [ 'name.asc' ], {}, { 'state':true } ).error ).toBeFalse();
-      } );
-      it( 'can let the whiteList previal', function () {
-        expect( mock.sort( [ 'state.asc' ], { 'state':true }, { 'state':true } ).error ).toBeFalse();
+    } );
+
+    describe( 'Composer Utils', function () {
+      it( 'can create unique keys', function () {
+        expect( mock.uniqueKey( 'blah', { 'blah': true } ) ).toBe( 'blah_1' );
+        expect( mock.uniqueKey( 'blah', { 'blah': true, 'blah_1': true } ) ).toBe( 'blah_1_1' );
       } );
     } );
 
   }
-  }
+
+}

@@ -1,71 +1,45 @@
 component {
 
   property name='settings' inject='coldbox:modulesettings:squrll' getter='false' setter='false';
-
-  variables.sqlTypes = {
-    'bigint': 'bigint'
-    ,'bit': 'bit'
-    ,'char': 'char'
-    ,'blob': 'blob'
-    ,'clob': 'clob'
-    ,'date': 'date'
-    ,'decimal': 'decimal'
-    ,'double': 'double'
-    ,'float': 'float'
-    ,'idstamp': 'idstamp'
-    ,'int': 'integer'
-    ,'integer': 'integer'
-    ,'longvarchar': 'longvarchar'
-    ,'longnvarchar': 'longnvarchar'
-    ,'money': 'money'
-    ,'money4': 'money4'
-    ,'numeric': 'numeric'
-    ,'real': 'real'
-    ,'refcursor': 'refcursor'
-    ,'smallint': 'smallint'
-    ,'time': 'time'
-    ,'timestamp': 'timestamp'
-    ,'tinyint': 'tinyint'
-    ,'varchar': 'varchar'
-    ,'nvarchar': 'nvarchar'
-  };
+  property name='Validator' inject='Validator';
 
   variables.operators = {
-    'or': 'OR'
-    ,'and': 'AND'
-    ,'eq': '='
-    ,'neq': '<>'
-    ,'is': 'IS'
-    ,'nis': 'IS NOT'
-    ,'in': 'IN'
-    ,'nin': 'NOT IN'
-    ,'like': 'LIKE'
-    ,'nlike': 'NOT LIKE'
-    ,'ilike': 'ILIKE'
+    'or':      'OR'
+    ,'and':    'AND'
+    ,'eq':     '='
+    ,'neq':    '<>'
+    ,'is':     'IS'
+    ,'nis':    'IS NOT'
+    ,'in':     'IN'
+    ,'nin':    'NOT IN'
+    ,'like':   'LIKE'
+    ,'nlike':  'NOT LIKE'
+    ,'ilike':  'ILIKE'
     ,'nilike': 'NOT ILIKE'
-    ,'lt': '<'
-    ,'gt': '>'
-    ,'lte': '<='
-    ,'gte': '>='
+    ,'lt':     '<'
+    ,'gt':     '>'
+    ,'lte':    '<='
+    ,'gte':    '>='
   };
 
   public Composer function init() {
     return this;
   }
 
-  public struct function filter( required struct tree, struct whiteList={}, struct blackList={} ) {
+  public struct function filter( required struct tree, required struct columnTypes ) {
     var result = {
-      'sql': ''
-      ,'queryParams': {}
-      ,'error': false
+      'sql':            ''
+      ,'queryParams':   {}
+      ,'error':         false
       ,'errorMessages': []
     };
+
     if ( tree.type == 'LogicalExpression' ) {
-      result.append( handleLogicalExpression( tree, {}, whiteList, blackList ) );
+      result.append( handleLogicalExpression( tree, {}, columnTypes ) );
       result.sql = ' #settings.filterPrepend# #result.sql#';
     }
     else if ( tree.type == 'BinaryExpression' ) {
-      result.append( handleBinaryExpression( tree, {}, whiteList, blackList ) );
+      result.append( handleBinaryExpression( tree, {}, columnTypes ) );
       result.sql = ' #settings.filterPrepend# #result.sql#';
     }
     else {
@@ -81,24 +55,23 @@ component {
   private struct function handleLogicalExpression(
     required struct leaf
     ,required struct queryParams
-    ,required struct whiteList
-    ,required struct blackList
+    ,required struct columnTypes
   ) {
     var result = {
-      'sql': ''
-      ,'queryParams': queryParams
-      ,'error': false
+      'sql':            ''
+      ,'queryParams':   queryParams
+      ,'error':         false
       ,'errorMessages': []
     };
     var temp = {};
 
     if ( leaf.left.type == 'LogicalExpression' ) {
-      temp = handleLogicalExpression( leaf.left, queryParams, whiteList, blackList )
+      temp = handleLogicalExpression( leaf.left, queryParams, columnTypes )
       result.sql &= '( ' & temp.sql & ') ';
     }
 
     if ( leaf.left.type == 'BinaryExpression' ) {
-      temp = handleBinaryExpression( leaf.left, queryParams, whiteList, blackList  );
+      temp = handleBinaryExpression( leaf.left, queryParams, columnTypes );
       result.sql &= temp.sql;
     }
 
@@ -111,16 +84,16 @@ component {
     }
 
     if ( leaf.right.type == 'BinaryExpression' ) {
-      temp = handleBinaryExpression( leaf.right, queryParams, whiteList, blackList  );
+      temp = handleBinaryExpression( leaf.right, queryParams, columnTypes );
       result.sql &= temp.sql;
     }
 
     if ( leaf.right.type == 'LogicalExpression' ) {
-      temp = '( ' & handleLogicalExpression( leaf.right, queryParams, whiteList, blackList ) & ') ';
+      temp = '( ' & handleLogicalExpression( leaf.right, queryParams, columnTypes ) & ') ';
       result.sql &= temp.sql;
     }
 
-    //result.queryParams.append( temp.queryParams );
+    result.queryParams.append( temp.queryParams );
     //result.errorMessages.append( temp.errorMessages, true );
     //result.error = temp.error ? temp.error : result.error;
 
@@ -130,13 +103,12 @@ component {
   private struct function handleBinaryExpression(
     required struct leaf
     ,required struct queryParams
-    ,required struct whiteList
-    ,required struct blackList
+    ,required struct columnTypes
   ) {
     var result = {
-      'sql': ''
-      ,'queryParams': queryParams
-      ,'error': false
+      'sql':            ''
+      ,'queryParams':   queryParams
+      ,'error':         false
       ,'errorMessages': []
     };
 
@@ -156,7 +128,7 @@ component {
 
     if ( leaf.left.type == 'Identifier' ) {
       result.sql &= leaf.left.name & ' ';
-      if ( !columnAllowed( leaf.left.name, whiteList, blackList ) ) {
+      if ( !columnTypes.keyExists( leaf.left.name ) ) {
         result.error = true;
         result.errorMessages.append( '#settings.filterUrlParam#: Column "#leaf.left.name#" does not exist or is not allowed here.' );
       }
@@ -171,17 +143,28 @@ component {
     // TODO: Handle right Identifier
 
     if ( leaf.right.type == 'Literal' ) {
-      result.sql &= leaf.right.raw & ' ';
+      var paramName = uniqueKey( 'squrll_' & leaf.left.name, result.queryParams );
+      var paramConfig = { 'cfsqltype': columnTypes[ leaf.left.name ] };
 
-      // TODO: create param; check whitelist for param type else infer type param
-      // TODO: dedupe queryParamName or simply use a counter??
-      // TODO: Handle Null
-      //'cf_sql_'
-      //'sql_'
-      // null: true, list:true, separator: ','
-      // var sqlType = whiteList.keyExists( leaf.left.name ) ? whiteList[ leaf.left.name ] : '';
+      if ( Validator._isNull( leaf.right.raw ) ) {
+        paramConfig['null'] = true;
+      }
+      else if ( !Validator.isValid( columnTypes[ leaf.left.name ], leaf.right.raw ) ) {
+        result.error = true;
+        result.errorMessages.append( '#settings.filterUrlParam#: Invalid type supplied for column #paramName#, #leaf.right.raw#' );
+      }
+
+      result.queryParams.append( { '#paramName#': paramConfig } );
+      result.sql &= ':#paramName# ';
     }
     return result;
+  }
+
+  public string function uniqueKey( required string key, required struct map ) {
+    if ( map.keyExists( key ) ) {
+      return uniqueKey( key & '_1', map );
+    }
+    return key;
   }
 
   public string function range( required numeric offset, numeric limit ) {
@@ -191,17 +174,17 @@ component {
     return ' LIMIT ALL OFFSET #offset# ';
   }
 
-  public struct function sort( required array columns, struct whiteList={}, struct blackList={} ) {
+  public struct function sort( required array columns, required struct columnTypes ) {
     var result = {
-      'sql': ''
-      ,'error': false
+      'sql':            ''
+      ,'error':         false
       ,'errorMessages': []
     };
     var sql = ' #settings.sortPrepend#';
     var columnCount = columns.len();
 
     columns.each( function ( expression, index ) {
-      var column = sortColumn( expression, whiteList, blackList );
+      var column = sortColumn( expression, columnTypes );
       result.error = column.error ? column.error : result.error;
       result.errorMessages.append( column.errorMessages, true );
       sql &= column.sql;
@@ -213,19 +196,15 @@ component {
     return result;
   }
 
-  private struct function sortColumn(
-    required string expression
-    ,required struct whiteList
-    ,required struct blackList
-  ) {
+  private struct function sortColumn( required string expression, required struct columnTypes ) {
     var result = {
-      'sql': ''
-      ,'error': false
+      'sql':            ''
+      ,'error':         false
       ,'errorMessages': []
     };
     var sorts = {
-      'asc': 'ASC'
-      ,'dsc': 'DESC'
+      'asc':   'ASC'
+      ,'dsc':  'DESC'
       ,'desc': 'DESC'
     };
     var nulls = {
@@ -245,7 +224,8 @@ component {
       result.error = true;
       result.errorMessages.append( '#settings.sortUrlParam#: Column "#parts[ 1 ]#" contains illegal characters.' );
     }
-    else if ( columnAllowed( parts[ 1 ], whiteList, blackList ) ) {
+
+    else if ( columnTypes.keyExists( parts[ 1 ] ) ) {
       result.sql &= ' #parts[ 1 ]#';
     }
     else {
@@ -283,15 +263,6 @@ component {
     }
 
     return result;
-  }
-
-  private boolean function columnAllowed(
-    required string column
-    ,required struct whiteList
-    ,required struct blackList
-  ) {
-    return ( ( whiteList.isEmpty() && settings.ignoreEmptyWhiteList ) || whiteList.keyExists( column ) ) &&
-      ( blackList.isEmpty() || ( !blackList.keyExists( column ) || whiteList.keyExists( column ) ) );
   }
 
 }

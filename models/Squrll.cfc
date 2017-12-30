@@ -8,13 +8,13 @@ component accessors='false' {
     return this;
   }
 
-  public struct function parse( required struct urlParams, struct opts={} ) {
+  public struct function parse( required struct urlParams, struct columnTypes={}, struct opts={} ) {
     var params = matchParamNames( urlParams );
     var options = defaultOptions( opts );
 
     var count = parseCount( params.count );
-    var filter = parseFilter( params.filter );
-    var sort = parseSort( params.sort );
+    var filter = parseFilter( params.filter, columnTypes );
+    var sort = parseSort( params.sort, columnTypes );
     var range = parseRange( params.offset, params.limit, options.allowNoLimit );
 
     var result = {
@@ -55,7 +55,7 @@ component accessors='false' {
     return result;
   }
 
-  public struct function parseFilter( string expression='' ) {
+  public struct function parseFilter( string expression='', struct columnTypes={} ) {
     var result = {
       'sql': ''
       ,'queryParams': {}
@@ -73,19 +73,19 @@ component accessors='false' {
       result.errorMessages = parserResult.errorMessages
       return result;
     }
-    result = Composer.filter( parserResult.tree );
+    result = Composer.filter( parserResult.tree, columnTypes );
 
     return result;
   }
 
-  public struct function parseSort( string expression='' ) {
+  public struct function parseSort( string expression='', struct columnTypes={} ) {
     var result = {
       'sql': ''
       ,'error': false
       ,'errorMessages': []
     };
     if ( expression == '' ) { return result; }
-    return Composer.sort( listToArray( expression, ',' ) );
+    return Composer.sort( listToArray( expression, ',' ), columnTypes );
   }
 
   public struct function parseRange( string offset='', string limit='', boolean allowNoLimit=false ) {

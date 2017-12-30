@@ -4,14 +4,22 @@ _Squrll safely creates SQL clauses from URL parameters_
 
 [![Master Branch Build Status](https://img.shields.io/travis/coryasilva/squrll/master.svg?style=flat-square&label=master)](https://travis-ci.org/coryasilva/squrll)
 
-**Step1: URL Input**: _(Not URL encoded for human readability)_
+## Example
+
+**Step 1: URL Input**: _(Not URL encoded for human readability)_
 
 `GET https://domain.tld/api/v1/resource?filter=title like "_Manager_" and active eq true&sort=name.dsc.nullsfirst&limit=20&offset=40&count=true`
 
-**Step2: Squrll Output**: _(controller)_
+**Step 2: Squrll**:
 
 ```java
-var result = Squrll.parse( URL );
+var columnTypes = {
+  'title': 'cf_sql_varchar'
+  ,'active': 'cf_sql_boolean'
+  ,'name': 'varchar'
+};
+var result = Squrll.parse( URL, columnTypes );
+// result equals
 {
    'count': ' COUNT(*) OVER() AS _count '
   ,'filter': ' AND ( title LIKE "_Manager_" AND active = TRUE ) '
@@ -23,7 +31,7 @@ var result = Squrll.parse( URL );
 }
 ```
 
-**Step#: Build Query**
+**Step 3: Build Your Query**
 
 ```java
 function getStuff( tenantID, squrll ) {
@@ -45,13 +53,19 @@ function getStuff( tenantID, squrll ) {
 }
 ```
 
-## Why
+---
 
-Instead of coding specific filter behaviors and sorting flags we can instead use a repeatable, configurable, and standard way to define filters, sorts, and paging.  This project was originally intended to work with legacy projects but could be used for new projects as well.
+## Documentation
 
-**CURRENTLY BUILT FOR POSTGRES** _(though, easily extendable)_
+### Purpose
 
-## URL Parameters
+Instead of coding specific filter behaviors and sorting flags we can instead use a repeatable, configurable, and standard way to define filters, sorts, and paging.  This project is intended to work with legacy projects but could be used for new projects as well.
+
+### SQL Dialects
+
+_Currently this package only supports Postgres, pull requests welcome for other dialects_
+
+### URL Parameters
 
 _SQL clauses are built from URL strings assigned to specific URL parameters._
 
@@ -65,21 +79,7 @@ _SQL clauses are built from URL strings assigned to specific URL parameters._
 
 *NOTE: The parameter names are configurable*
 
-## Sorting
-
-_A comma separated list of column expressions._
-
-_ex:_ `state.asc,name,created_date.dsc.nullslast`
-
-**Column Expressions** are `.` delimited strings, the "Column Name" is required while the direction and modifier are optional.
-
-| Column Name | Directions | Modifiers |
-| --- | --- | --- |
-| `[\w]+` | **asc**, desc, _dsc_  | nullsfirst, nullslast |
-
-_NOTE: The default direction is_ `asc`_, and_ `dsc` _is an alias for_ `desc`.
-
-## Filtering
+### Filtering
 
 _The filter expression is comprised of Logical and Binary expressions with a familiar syntax to build SQL WHERE clauses._
 
@@ -106,31 +106,83 @@ _ex:_ `rank gte 90 and ( status in "active,disabled,inactive" or edge_case eg tr
 
 *NOTE: Supports nested parenthesis/expressions*
 
-## Module Configs
+### Sorting
+
+_A comma separated list of column expressions._
+
+_ex:_ `state.asc,name,created_date.dsc.nullslast`
+
+**Column Expressions** are `.` delimited strings, the "Column Name" is required while the direction and modifier are optional.
+
+| Column Name | Directions | Modifiers |
+| --- | --- | --- |
+| `[\w]+` | **asc**, desc, _dsc_  | nullsfirst, nullslast |
+
+_NOTE: The default direction is_ `asc`_, and_ `dsc` _is an alias for_ `desc`.
+
+### Paging
+
+_Two URL parameters control the pagination._
+
+- `?limit=20&offset=40` - Will return 20 rows offset by 40 rows
+- `?offset=40` - Will return the `defaultLimit` offset by 40 rows or all rows if `allowNoLimit` is `true`
+- `?limit=40` - Will return the first 40 rows
+
+### Count
+
+_Boolean URL param will allow the client request the total count._
+
+Currently this only builds a SQL select row but does not suggest how to format the response. Suggestions?
+ - Headers?
+ - Enveloped JSON or XML?
+ - Out of scope for this project, do what you want?
+
+### Module Configs
 
 ```java
 settings = {
-  countUrlParam:       'count'  // Name of the URL parameter
-  ,filterUrlParam:     'filter' // Name of the URL parameter
-  ,sortUrlParam:       'sort'   // Name of the URL parameter
-  ,limitUrlParam:      'limit'  // Name of the URL parameter
-  ,offsetUrlParam:     'offset' // Name of the URL parameter
-  ,filterIncludeWhere: true     // Include `WHERE` in the filter sql clause
-  ,sortIncludeOrderBy: true     // Include `ORDER BY` in the sort sql clause
-  ,defaultLimit:       20       // Default record limit when not defined, ignored if allowNoLimit is true
-  ,allowNoLimit:       false    // Allow unlimited rows to be returned
-  ,columnWhiteList:    {}       // Only allow these columns on all requests
-  ,columnBlackList:    {}       // Do not allow these columns on all requests
+  countUrlParam:   'count'    // Name of the URL parameter
+  ,filterUrlParam: 'filter'   // Name of the URL parameter
+  ,sortUrlParam:   'sort'     // Name of the URL parameter
+  ,limitUrlParam:  'limit'    // Name of the URL parameter
+  ,offsetUrlParam: 'offset'   // Name of the URL parameter
+  ,filterPrepend:  'AND'      // Include `AND` or `WHERE` in the filter sql clause
+  ,sortPrepend:    'ORDER BY' // Include `ORDER BY` in the sort sql clause
+  ,defaultLimit:   20         // Default record limit when not defined, ignored if allowNoLimit is true
+  ,allowNoLimit:   false      // Allow unlimited rows to be returned
+  ,columnTypes:    {}         // Allow and type these columns on all requests `{ columnName: 'cf_sql_type' }`
 };
 ```
 
-## SQL Injection
+### Data Types
 
-This package mitigates SQL injection by parsing the URL into an abstract syntax tree.  Each token is validated upon parsing and the strict language syntax inherently eliminates the threat for SQL injection.  The filter composer also creates `cfqueryparam`'s to further limit the attack base.
+#### Numeric
 
-Other options like "Column White/Black Lists" further secure the SQL that is generated.
+_Numbers are validated by bounds in hopes to help prevent database exceptions and instead in form the user with an error message.  See the ValidatorTests.cfc for examples._
+
+#### Date/Time Formats
+
+_A subset of the ISO 8601 standard has been employed_
+
+- `YYYY-MM-DD`
+- `YYYY-MM-DDTHH:MM`
+- `YYYY-MM-DDTHH:MM:SS`
+- `YYYY-MM-DDTHH:MM:SS.SSS`
+- `YYYY-MM-DDTHH:MMZ`
+- `YYYY-MM-DDTHH:MMZ12`
+- `YYYY-MM-DDTHH:MMZ+12`
+- `YYYY-MM-DDTHH:MMZ-12`
+- `YYYY-MM-DDTHH:MMZ12:30`
+
+### SQL Injection
+
+This package mitigates SQL injection by parsing the URL into an abstract syntax tree.  Each token is validated upon parsing and the strict language syntax inherently eliminates the threat for SQL injection.  The filter composer also creates `cfqueryparam`'s and qualifies each value against its `cfsqltype` to further limit the attack base.
+
+Also a struct of columns, acting as a whitelist, is required for both filtering and sorting.  Each column must include a `cf_sql_type` in order for the filtering to work. (Sorting only requires that the column exists in the struct).
 
 If you have any concerns that are not covered by the tests let's add them!
+
+---
 
 ## Inspired By
 
@@ -138,23 +190,23 @@ If you have any concerns that are not covered by the tests let's add them!
 - [**PostgREST** _- serve a restful API from any postgres database_](https://postgrest.com/en/v4.3/)
 - [**jsep** _- tiny javascript expression parser_](http://jsep.from.so/)
 
+---
+
 ## TODO
 
-**High Priority**
-- columnWhiteList: {}
-- columnBlackList: {}
-- Build Query Parameter struct for filter sql
-- Standardize date format
-  - DateValue eq 2012-12-03
-  - DateTimeOffsetValue eq 2012-12-03T07:16:23Z
-- verify example output
-
-**Low Priority**
-- Add LIKE ANY
-- Add NOT LIKE ANY
-- Add ILIKE ANY
-- Add NOT ILIKE ANY
-- Add ANY
-- Add NOT ANY
-- operatorInclude: {}
-- operatorExclude: {}
+- Verify example output
+- Add more test coverage for the Composer.cfc
+- Add more test coverage for order of operations in the Squrll.cfc
+- Add more test coverage for sql injection in the Squrll.cfc, Parser.cfc, and Composer.cfc
+- Have Travis CI actually run some queries against postgres!
+- Finish the option overrides
+- Allow sets/arrays/lists
+  - `LIKE ANY`
+  - `NOT LIKE ANY`
+  - `ILIKE ANY`
+  - `NOT ILIKE ANY`
+  - `ANY`
+  - `NOT ANY`
+  - `ALL`
+- Consider allowing some operators to be disabled: `settings.disabledOperators: {}`
+- Vet the implementation of `count`

@@ -91,7 +91,7 @@ component accessors='false' {
     return Composer.sort( listToArray( expression, ',' ), columnTypes );
   }
 
-  public struct function parseRange( string offset='', string limit='', numeric defaulLimit=20, boolean allowNoLimit=false ) {
+  public struct function parseRange( string offset='', string limit='', numeric defaultLimit=20, boolean allowNoLimit=false ) {
     var result = {
       'sql': ''
       ,'error': false

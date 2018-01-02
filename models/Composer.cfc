@@ -34,6 +34,9 @@ component {
       ,'errorMessages': []
     };
 
+    // Append global columntypes ( global overrides )
+    columnTypes.append( settings.columnTypes, true );
+
     if ( tree.type == 'LogicalExpression' ) {
       result.append( handleLogicalExpression( tree, {}, columnTypes ) );
       result.sql = ' #settings.filterPrepend# #result.sql#';
@@ -204,6 +207,9 @@ component {
     };
     var sql = ' #settings.sortPrepend#';
     var columnCount = columns.len();
+
+    // Append global columntypes ( global overrides )
+    columnTypes.append( settings.columnTypes, true );
 
     columns.each( function ( expression, index ) {
       var column = sortColumn( expression, columnTypes );

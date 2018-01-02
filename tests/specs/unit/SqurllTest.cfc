@@ -11,7 +11,7 @@ component extends="testbox.system.BaseSpec" {
       ,sortPrepend:    'ORDER BY'
       ,defaultLimit:   20
       ,allowNoLimit:   false
-      ,columnTypes:    {}
+      ,columnTypes:    { 'created_date': 'cf_sql_timestamp' }
     };
     // Create target mock object
 
@@ -62,7 +62,7 @@ component extends="testbox.system.BaseSpec" {
         var test = mock.parse(
           mockURL
           ,{
-           'name':'cf_sql_varchar'
+           'name': 'cf_sql_varchar'
            ,'title': 'cf_sql_varchar'
            ,'active': 'cf_sql_boolean'
           }
@@ -90,7 +90,7 @@ component extends="testbox.system.BaseSpec" {
         var test = mock.parse(
           mockURL
           ,{
-           'name':'cf_sql_varchar'
+           'name': 'cf_sql_varchar'
            ,'rank': 'cf_sql_integer'
            ,'state': 'cf_sql_varchar'
           }
@@ -99,6 +99,17 @@ component extends="testbox.system.BaseSpec" {
         expect( test.filter ).toBe( ' AND name ILIKE :squrll_name ' );
         expect( test.sort ).toBe( ' ORDER BY rank DESC, state ASC NULLS FIRST ' );
         expect( test.range ).toBe( ' LIMIT 20 OFFSET 40 ' );
+        expect( test.error ).toBeFalse();
+      } );
+
+      it( 'can use global columnTypes', function () {
+        var mockURL = {
+          'filter': 'created_date gte "2014-06-01T00:00:00Z"'
+          ,'sort': 'created_date.desc'
+        };
+        var test = mock.parse( mockURL, {} );
+        expect( test.filter ).toBe( ' AND created_date >= :squrll_created_date ' );
+        expect( test.sort ).toBe( ' ORDER BY created_date DESC ' );
         expect( test.error ).toBeFalse();
       } );
 

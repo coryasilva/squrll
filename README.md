@@ -133,12 +133,9 @@ _Two URL parameters control the pagination._
 
 ### Count
 
-_Boolean URL param will allow the client request the total count._
+_Boolean URL param will allow the client to request the total count._
 
-Currently this only builds a SQL select row but does not suggest how to format the response. Suggestions?
- - Headers?
- - Enveloped JSON or XML?
- - Out of scope for this project, do what you want?
+Currently this only builds a partial SQL column select statement but does not suggest how to format the response. Currently that is out of scope for this project.
 
 ### Module Configs
 
@@ -161,11 +158,11 @@ settings = {
 
 #### Numeric
 
-_Numbers are validated by bounds in hopes to help prevent database exceptions and instead in form the user with an error message.  See the ValidatorTests.cfc for examples._
+_Numbers are validated by sql type bounds in hopes to help prevent database exceptions and instead inform the user with an error message.  See the ValidatorTests.cfc for examples._
 
 #### Date/Time Formats
 
-_A subset of the ISO 8601 standard has been employed_
+_A subset of the ISO 8601 standard has been employed. (TL'DR Dashes and colons are required)_
 
 - `YYYY-MM-DD`
 - `YYYY-MM-DDTHH:MM`
@@ -187,7 +184,7 @@ If you have any concerns that are not covered by the tests let's add them!
 
 ---
 
-## Inspired By
+## Inspiration - stolen ideas and logic :)
 
 - [**OData** _- Simplifying data sharing across disparate applications in enterprise, Cloud, and mobile devices_](http://docs.oasis-open.org/odata/odata/v4.0/odata-v4.0-part2-url-conventions.html)
 - [**PostgREST** _- serve a restful API from any postgres database_](https://postgrest.com/en/v4.3/)
@@ -202,6 +199,13 @@ If you have any concerns that are not covered by the tests let's add them!
 - Test for malformed syntax
 - Test for more SQL Injection
 - Test order of operations
+- Expand the ColumnTypes to support of a struct that accomodates some cfqueryparam arguments
+  - `type` (string)
+  - `default` (string) a default value if none passed in
+  - `maxLenth` (numeric)
+  - `scale` (numeric: applies to `cf_sql_numeric` and `cf_sql_decimal`)
+  - `list` (boolean)
+  - `separator` (char: `, ; | :`)
 - Allow sets/arrays/lists
   - `LIKE ANY`
   - `NOT LIKE ANY`
@@ -210,11 +214,9 @@ If you have any concerns that are not covered by the tests let's add them!
   - `ANY`
   - `NOT ANY`
   - `ALL`
-- Expand the ColumnTypes to support of a struct to mirror cfqueryparam arguments
 
 ### Low Priority
 
 - Have Travis CI actually run some queries against postgres
-- Vet the implementation of `count`
 - Consider allowing some operators to be disabled: `settings.disabledOperators: {}`
 - Consider using cb-validator to further confine literals

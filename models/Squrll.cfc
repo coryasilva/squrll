@@ -8,14 +8,17 @@ component accessors='false' {
     return this;
   }
 
-  public struct function parse( required struct urlParams, struct columnTypes={}, struct opts={} ) {
+  public struct function parse(
+    required struct urlParams
+    ,struct columnTypes={}
+    ,numeric defaultLimit=settings.defaultLimit
+    ,boolean allowNoLimit=settings.allowNoLimit
+  ) {
     var params = matchParamNames( urlParams );
-    var options = defaultOptions( opts );
-
     var count = parseCount( params.count );
     var filter = parseFilter( params.filter, columnTypes );
     var sort = parseSort( params.sort, columnTypes );
-    var range = parseRange( params.offset, params.limit, options.allowNoLimit );
+    var range = parseRange( params.offset, params.limit, settings.defaultLimit, settings.allowNoLimit );
 
     var result = {
       'count': count.sql
@@ -88,7 +91,7 @@ component accessors='false' {
     return Composer.sort( listToArray( expression, ',' ), columnTypes );
   }
 
-  public struct function parseRange( string offset='', string limit='', boolean allowNoLimit=false ) {
+  public struct function parseRange( string offset='', string limit='', numeric defaulLimit=20, boolean allowNoLimit=false ) {
     var result = {
       'sql': ''
       ,'error': false
@@ -111,7 +114,7 @@ component accessors='false' {
     }
 
     // Limit
-    var _limit = settings.defaultLimit;
+    var _limit = defaultLimit;
     if ( arguments.limit != '' && refind('[^0-9]', arguments.limit ) == 0 ) {
       _limit = LSParseNumber( arguments.limit );
     }
@@ -129,13 +132,6 @@ component accessors='false' {
     }
 
     return result;
-  }
-
-  private struct function defaultOptions( required struct options ) {
-    var defaults = {
-      'allowNoLimit': false
-    };
-    return defaults;
   }
 
   private struct function matchParamNames( required struct params ) {

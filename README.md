@@ -202,7 +202,6 @@ If you have any concerns that are not covered by the tests let's add them!
 - Test for malformed syntax
 - Test for more SQL Injection
 - Test order of operations
-- Finish the option overrides
 - Allow sets/arrays/lists
   - `LIKE ANY`
   - `NOT LIKE ANY`

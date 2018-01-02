@@ -22,10 +22,10 @@ var result = Squrll.parse( URL, columnTypes );
 // result equals
 {
    'count': ' COUNT(*) OVER() AS _count '
-  ,'filter': ' AND title LIKE "_Manager_" AND active = TRUE '
+  ,'filter': ' AND title LIKE :squrll_title AND active = :squrll_active '
   ,'queryParams': {
-    'squrll_title': { 'cfsqltype': 'cf_sql_varchar' }
-    ,'squrll_active':  { 'cfsqltype': 'cf_sql_varchar' }
+    'squrll_title': { 'cfsqltype': 'cf_sql_varchar', 'value': '_Manager_' }
+    ,'squrll_active':  { 'cfsqltype': 'cf_sql_varchar', 'value': 'true' }
   }
   ,'sort': ' ORDER BY name DESC NULLS FIRST '
   ,'range': ' LIMIT 20 OFFSET 40 '

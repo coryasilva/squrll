@@ -6,6 +6,9 @@
 # NodeJS
 /node_modules
 
+# Commandbox
+jmimemagic.log
+
 # Coldbox Modules
 /modules
 

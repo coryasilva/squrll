@@ -94,8 +94,8 @@ component {
     }
 
     result.queryParams.append( temp.queryParams );
-    //result.errorMessages.append( temp.errorMessages, true );
-    //result.error = temp.error ? temp.error : result.error;
+    result.errorMessages.append( temp.errorMessages, true );
+    result.error = temp.error ? temp.error : result.error;
 
     return result;
   }
@@ -134,29 +134,43 @@ component {
       }
     }
 
-    // TODO: Handle left Literal
+    // TODO: Handle left Literal?
+    if ( leaf.left.type == 'Literal' ) {
+      result.error = true;
+      result.errorMessages.append( '#settings.filterUrlParam#: Binary Expression with left side Literal has not been implemented' );
+    }
 
     if ( leaf.keyExists( 'operator' ) && variables.operators.keyExists( leaf.operator ) ) {
       result.sql &= variables.operators[ leaf.operator ] & ' ';
     }
 
-    // TODO: Handle right Identifier
-
     if ( leaf.right.type == 'Literal' ) {
       var paramName = uniqueKey( 'squrll_' & leaf.left.name, result.queryParams );
       var paramConfig = { 'cfsqltype': transformCfSqlType( columnTypes[ leaf.left.name ] ) };
+      var isNull = Validator._isNull( leaf.right.value );
 
-      if ( Validator._isNull( leaf.right.raw ) ) {
-        paramConfig['null'] = true;
+      if ( isNull ) {
+        paramConfig[ 'null' ] = true;
       }
-      else if ( !Validator.isValid( columnTypes[ leaf.left.name ], leaf.right.raw ) ) {
+      else {
+        paramConfig[ 'value' ] = leaf.right.value;
+      }
+
+      if ( !Validator.isValid( columnTypes[ leaf.left.name ], leaf.right.value ) && !isNull ) {
         result.error = true;
-        result.errorMessages.append( '#settings.filterUrlParam#: Invalid type supplied for column #paramName#, #leaf.right.raw#' );
+        result.errorMessages.append( '#settings.filterUrlParam#: Invalid type supplied for column #paramName#, #leaf.right.value#' );
       }
 
       result.queryParams.append( { '#paramName#': paramConfig } );
       result.sql &= ':#paramName# ';
     }
+
+    // TODO: Handle right Identifier?
+    if ( leaf.right.type == 'Identifier' ) {
+      result.error = true;
+      result.errorMessages.append( '#settings.filterUrlParam#: Binary Expression with right side Identifier has not been implemented' );
+    }
+
     return result;
   }
 

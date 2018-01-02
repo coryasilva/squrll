@@ -70,8 +70,8 @@ component extends="testbox.system.BaseSpec" {
         expect( test.count ).toBe( ' COUNT(*) OVER() AS _count ' );
         expect( test.filter ).toBe( ' AND title LIKE :squrll_title AND active = :squrll_active ' );
         expect( test.queryParams ).toBe( {
-          'squrll_title': { 'cfsqltype': 'cf_sql_varchar' }
-          ,'squrll_active':  { 'cfsqltype': 'cf_sql_varchar' }
+          'squrll_title': { 'cfsqltype': 'cf_sql_varchar', 'value': '_Manager_' }
+          ,'squrll_active':  { 'cfsqltype': 'cf_sql_varchar', 'value': 'true' }
         } );
         expect( test.sort ).toBe( ' ORDER BY name DESC NULLS FIRST ' );
         expect( test.range ).toBe( ' LIMIT 20 OFFSET 40 ' );
@@ -100,6 +100,69 @@ component extends="testbox.system.BaseSpec" {
         expect( test.sort ).toBe( ' ORDER BY rank DESC, state ASC NULLS FIRST ' );
         expect( test.range ).toBe( ' LIMIT 20 OFFSET 40 ' );
         expect( test.error ).toBeFalse();
+      } );
+
+    } );
+
+    // TODO: Test for malformed syntax
+    // TODO: Test for more SQL Injection
+    // TODO: Test every sql type query parameters
+    // TODO: Test all SQL operators
+    // TODO: Test order of operations
+
+    describe( 'SQL comment mitigation', function () {
+      var columns = { 'username': 'varchar' };
+      var expectation = ' AND username = :squrll_username ';
+
+      it( 'can mitigate SQL injection /*', function () {
+        var badValue = '1'' or ''1'' = ''1''))/*';
+        var mockURL = { 'filter': 'username eq "1'' or ''1'' = ''1''))/*"' };
+        var test = mock.parse( mockURL, columns );
+        expect( test.filter ).toBe( expectation );
+        expect( test.queryParams.squrll_username.value ).toBe( badValue );
+      } );
+
+      it( 'can mitigate SQL injection --', function () {
+        var badValue = '1'' or ''1'' = ''1''--';
+        var mockURL= { 'filter': 'username eq "1'' or ''1'' = ''1''--"' };
+        var test = mock.parse( mockURL, columns );
+        expect( test.filter ).toBe( expectation );
+        expect( test.queryParams.squrll_username.value ).toBe( badValue );
+      } );
+
+    } );
+
+    describe( 'SQL 1=1 mitigation', function () {
+      var columns = { 'username': 'varchar' };
+      /* Alternative Expression of 'or 1 = 1'
+        'SQLi' = 'SQL'+'i'
+        'SQLi' > 'S'
+        20 > 1
+        2 between 3 and 1
+        'SQLi' = N'SQLi'
+        1 and 1 = 1
+        1 || 1 = 1
+        1 && 1 = 1
+      */
+      it( 'can mitigate SQL injection 1=1', function () {
+        var mockURL = { 'filter': '1 eq 1' };
+        var test = mock.parse( mockURL, columns );
+        expect( test.error ).toBeTrue();
+        expect( test.filter ).toBe( '' );
+      } );
+
+      it( 'can mitigate SQL injection "a" = "a"', function () {
+        var mockURL = { 'filter': '"a" eq "a"' };
+        var test = mock.parse( mockURL, columns );
+        expect( test.error ).toBeTrue();
+        expect( test.filter ).toBe( '' );
+      } );
+
+      it( 'can mitigate SQL injection column = column', function () {
+        var mockURL = { 'filter': 'column eq column' };
+        var test = mock.parse( mockURL, columns );
+        expect( test.error ).toBeTrue();
+        expect( test.filter ).toBe( '' );
       } );
 
     } );

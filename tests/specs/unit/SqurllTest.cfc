@@ -120,6 +120,24 @@ component extends="testbox.system.BaseSpec" {
         expect( test.error ).toBeFalse();
       } );
 
+      it( 'can properly order `or` & `and`', function () {
+        var mockURL = {
+          'filter': 'a eq 1 and b eq 2 or c eq 3 and d eq 4 or e eq 5 or f eq 6'
+        };
+        var test = mock.parse( mockURL, { a: 'integer', b: 'integer', c: 'integer', d: 'integer', e: 'integer', f: 'integer' } );
+        expect( test.filter ).toBe( ' AND ( ( ( a = :squrll_a AND b = :squrll_b ) OR ( c = :squrll_c AND d = :squrll_d ) ) OR e = :squrll_e ) OR f = :squrll_f ' );
+        expect( test.error ).toBeFalse();
+      } );
+
+      it( 'can properly order `or` & `and` with nested parenthesis', function () {
+        var mockURL = {
+          'filter': 'a eq 1 and ( b eq 2 or ( c eq 3 and d eq 4 ) or e eq 5 ) or f eq 6'
+        };
+        var test = mock.parse( mockURL, { a: 'integer', b: 'integer', c: 'integer', d: 'integer', e: 'integer', f: 'integer' } );
+        expect( test.filter ).toBe( ' AND ( a = :squrll_a AND ( ( b = :squrll_b OR ( c = :squrll_c AND d = :squrll_d ) ) OR e = :squrll_e ) ) OR f = :squrll_f ' );
+        expect( test.error ).toBeFalse();
+      } );
+
     } );
 
     describe( 'SQL comment mitigation', function () {

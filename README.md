@@ -56,8 +56,6 @@ function getStuff( tenantID, squrll ) {
 }
 ```
 
----
-
 ## Documentation
 
 ### Purpose
@@ -207,8 +205,6 @@ Also a struct of columns, acting as a whitelist, is required for both filtering 
 
 If you have any concerns that are not covered by the tests let's add them!
 
----
-
 ## Inspiration - stolen ideas and logic :)
 
 - [**OData** _- Simplifying data sharing across disparate applications in enterprise, Cloud, and mobile devices_](http://docs.oasis-open.org/odata/odata/v4.0/odata-v4.0-part2-url-conventions.html)
@@ -217,11 +213,10 @@ If you have any concerns that are not covered by the tests let's add them!
 
 ---
 
-## TODO
+### TODO
 
-### High Priority
+#### High Priority
 
-- Test order of operations
 - Allow sets/arrays/lists
   - `LIKE ANY`
   - `NOT LIKE ANY`
@@ -230,9 +225,10 @@ If you have any concerns that are not covered by the tests let's add them!
   - `ANY`
   - `NOT ANY`
   - `ALL`
-
-### Low Priority
-
 - Have Travis CI actually run some queries against postgres
+
+#### Low Priority
+
 - Consider allowing some operators to be disabled: `settings.disabledOperators: {}`
 - Consider using cb-validator to further confine literals
+- Consider allowing the filter values to be mutated by a UDF.

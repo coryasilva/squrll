@@ -31,6 +31,7 @@ component assessors='false' {
    * Operator map for the binary operations with their values set to their
    * corresponding binary precedence for quick reference:
    * see [Order of operations](http://en.wikipedia.org/wiki/Order_of_operations#Programming_language)
+   * see [Postgres SQL Precendence](https://www.postgresql.org/docs/9.6/static/sql-syntax-lexical.html#SQL-PRECEDENCE)
    */
   variables.operators = {
     'or':      1
@@ -39,16 +40,16 @@ component assessors='false' {
     ,'neq':    3
     ,'is':     3
     ,'nis':    3
+    ,'lt':     3
+    ,'gt':     3
+    ,'lte':    3
+    ,'gte':    3
     ,'in':     3
     ,'nin':    3
     ,'like':   3
     ,'nlike':  3
     ,'ilike':  3
     ,'nilike': 3
-    ,'lt':     4
-    ,'gt':     4
-    ,'lte':    4
-    ,'gte':    4
   };
 
   /**

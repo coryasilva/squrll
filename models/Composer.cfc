@@ -92,8 +92,8 @@ component {
     }
 
     if ( leaf.right.type == 'LogicalExpression' ) {
-      temp = '( ' & handleLogicalExpression( leaf.right, queryParams, columnTypes ) & ') ';
-      result.sql &= temp.sql;
+      temp = handleLogicalExpression( leaf.right, queryParams, columnTypes );
+      result.sql &=  '( ' & temp.sql & ') ';
     }
 
     result.queryParams.append( temp.queryParams );
@@ -134,6 +134,7 @@ component {
       if ( !columnTypes.keyExists( leaf.left.name ) ) {
         result.error = true;
         result.errorMessages.append( '#settings.filterUrlParam#: Column "#leaf.left.name#" does not exist or is not allowed here.' );
+        return result;
       }
     }
 
@@ -141,6 +142,7 @@ component {
     if ( leaf.left.type == 'Literal' ) {
       result.error = true;
       result.errorMessages.append( '#settings.filterUrlParam#: Binary Expression with left side Literal has not been implemented' );
+      return result;
     }
 
     if ( leaf.keyExists( 'operator' ) && variables.operators.keyExists( leaf.operator ) ) {
@@ -177,6 +179,7 @@ component {
       if ( !Validator.isValid( cfSqlType, leaf.right.value ) && !isNull ) {
         result.error = true;
         result.errorMessages.append( '#settings.filterUrlParam#: Invalid type supplied for column #paramName#, #leaf.right.value#' );
+        return result;
       }
 
       result.queryParams.append( { '#paramName#': paramConfig } );
@@ -187,6 +190,7 @@ component {
     if ( leaf.right.type == 'Identifier' ) {
       result.error = true;
       result.errorMessages.append( '#settings.filterUrlParam#: Binary Expression with right side Identifier has not been implemented' );
+      return result;
     }
 
     return result;

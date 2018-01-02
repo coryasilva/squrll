@@ -104,12 +104,6 @@ component extends="testbox.system.BaseSpec" {
 
     } );
 
-    // TODO: Test for malformed syntax
-    // TODO: Test for more SQL Injection
-    // TODO: Test every sql type query parameters
-    // TODO: Test all SQL operators
-    // TODO: Test order of operations
-
     describe( 'SQL comment mitigation', function () {
       var columns = { 'username': 'varchar' };
       var expectation = ' AND username = :squrll_username ';

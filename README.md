@@ -197,11 +197,13 @@ If you have any concerns that are not covered by the tests let's add them!
 
 ## TODO
 
-- Add more test coverage for the Composer.cfc
-- Add more test coverage for order of operations in the Squrll.cfc
-- Add more test coverage for sql injection in the Squrll.cfc, Parser.cfc, and Composer.cfc
-- Have Travis CI actually run some queries against postgres!
+### High Priority
+
+- Test for malformed syntax
+- Test for more SQL Injection
+- Test order of operations
 - Finish the option overrides
+- Finish the global columnTypes
 - Allow sets/arrays/lists
   - `LIKE ANY`
   - `NOT LIKE ANY`
@@ -210,6 +212,11 @@ If you have any concerns that are not covered by the tests let's add them!
   - `ANY`
   - `NOT ANY`
   - `ALL`
+- Expand the ColumnTypes to support of a struct to mirror cfqueryparam arguments
+
+### Low Priority
+
+- Have Travis CI actually run some queries against postgres
 - Vet the implementation of `count`
 - Consider allowing some operators to be disabled: `settings.disabledOperators: {}`
 - Consider using cb-validator to further confine literals

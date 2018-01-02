@@ -107,7 +107,10 @@ _ex:_ `rank gte 90 and ( status in "active,disabled,inactive" or edge_case eg tr
 | lte | <= | Binary |
 | gte | >= | Binary |
 
-*NOTE: Supports nested parenthesis/expressions*
+#### Filter Notes
+
+- Nested parenthesis/expressions are supported, _ex:_ ` a eq 1 and ( b gte 1 or c gte 1 )`
+- Evaluated expressions are NOT allowed, _ex:_ `column1 eq column2 + 3`
 
 ### Sorting
 
@@ -154,6 +157,28 @@ settings = {
 };
 ```
 
+### Column Types Struct
+
+_Column types are passed into each filter and sort function call and inherit from the "Module Configs".  If there is a conflict the model configs win._
+
+```java
+// Example
+columnTypes = {
+  'name': 'cf_sql_varchar'
+  ,'active': { 'type': 'cf_sql_varchar' }
+};
+```
+
+Struct keys must be the column names while the values are either a `'cf_sql_type'` or a struct with the following allowed keys:
+
+| Key | Type | Required | Default | Description |
+| --- | --- | --- | --- | --- |
+| `type` | _string_ | true | _none_ |  [see cfqueryparam](https://cfdocs.org/cfqueryparam) |
+| `maxLenth` | _numeric_ | false | _none_ | [see cfqueryparam](https://cfdocs.org/cfqueryparam) |
+| `scale` | _numeric_ | false | _none_ | Applies to `cf_sql_numeric` and `cf_sql_decimal` |
+| `list` | _boolean_ | false | _none_ | |
+| `separator` | _string_ | false | `','` |  Must be one of the following: `, ; | :` |
+
 ### Data Types
 
 #### Numeric
@@ -196,16 +221,7 @@ If you have any concerns that are not covered by the tests let's add them!
 
 ### High Priority
 
-- Test for malformed syntax
-- Test for more SQL Injection
 - Test order of operations
-- Expand the ColumnTypes to support of a struct that accomodates some cfqueryparam arguments
-  - `type` (string)
-  - `default` (string) a default value if none passed in
-  - `maxLenth` (numeric)
-  - `scale` (numeric: applies to `cf_sql_numeric` and `cf_sql_decimal`)
-  - `list` (boolean)
-  - `separator` (char: `, ; | :`)
 - Allow sets/arrays/lists
   - `LIKE ANY`
   - `NOT LIKE ANY`

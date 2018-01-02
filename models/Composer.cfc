@@ -149,8 +149,23 @@ component {
 
     if ( leaf.right.type == 'Literal' ) {
       var paramName = uniqueKey( 'squrll_' & leaf.left.name, result.queryParams );
-      var paramConfig = { 'cfsqltype': transformCfSqlType( columnTypes[ leaf.left.name ] ) };
+      var paramConfig = {};
       var isNull = Validator._isNull( leaf.right.value );
+      var cfSqlType = '';
+
+      // Build query parameter config struct
+      if ( isSimpleValue( columnTypes[ leaf.left.name ] ) ) {
+        cfSqlType = columnTypes[ leaf.left.name ];
+      }
+      else if ( isStruct( columnTypes[ leaf.left.name ] ) && structKeyExists( columnTypes[ leaf.left.name ], 'cfsqltype' ) ) {
+        paramConfig.append( columnTypes[ leaf.left.name ] );
+        cfSqlType = columnTypes[ leaf.left.name ].cfSqlType
+      }
+      else {
+        throw( 'ColumnType values must be a string or a struct containing a cfsqltype key', 'squrll' );
+      }
+
+      paramConfig[ 'cfsqltype' ] = transformCfSqlType( cfSqlType );
 
       if ( isNull ) {
         paramConfig[ 'null' ] = true;
@@ -159,7 +174,7 @@ component {
         paramConfig[ 'value' ] = leaf.right.value;
       }
 
-      if ( !Validator.isValid( columnTypes[ leaf.left.name ], leaf.right.value ) && !isNull ) {
+      if ( !Validator.isValid( cfSqlType, leaf.right.value ) && !isNull ) {
         result.error = true;
         result.errorMessages.append( '#settings.filterUrlParam#: Invalid type supplied for column #paramName#, #leaf.right.value#' );
       }

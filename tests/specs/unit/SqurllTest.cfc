@@ -113,6 +113,13 @@ component extends="testbox.system.BaseSpec" {
         expect( test.error ).toBeFalse();
       } );
 
+      it( 'can use columnType struct values', function () {
+        var mockURL = { 'filter': 'active neq true' };
+        var test = mock.parse( mockURL, { 'active': { 'cfsqltype': 'boolean' } } );
+        expect( test.filter ).toBe( ' AND active <> :squrll_active ' );
+        expect( test.error ).toBeFalse();
+      } );
+
     } );
 
     describe( 'SQL comment mitigation', function () {
@@ -138,17 +145,10 @@ component extends="testbox.system.BaseSpec" {
     } );
 
     describe( 'SQL 1=1 mitigation', function () {
+      /* When prefixing the filter clause with AND this does not really matter
+         but should still not be allowed. */
       var columns = { 'username': 'varchar' };
-      /* Alternative Expression of 'or 1 = 1'
-        'SQLi' = 'SQL'+'i'
-        'SQLi' > 'S'
-        20 > 1
-        2 between 3 and 1
-        'SQLi' = N'SQLi'
-        1 and 1 = 1
-        1 || 1 = 1
-        1 && 1 = 1
-      */
+
       it( 'can mitigate SQL injection 1=1', function () {
         var mockURL = { 'filter': '1 eq 1' };
         var test = mock.parse( mockURL, columns );
@@ -165,6 +165,20 @@ component extends="testbox.system.BaseSpec" {
 
       it( 'can mitigate SQL injection column = column', function () {
         var mockURL = { 'filter': 'column eq column' };
+        var test = mock.parse( mockURL, columns );
+        expect( test.error ).toBeTrue();
+        expect( test.filter ).toBe( '' );
+      } );
+
+      it( 'can mitigate SQL injection ABC=A', function () {
+        var mockURL = { 'filter': '"ABC" gt "A"' };
+        var test = mock.parse( mockURL, columns );
+        expect( test.error ).toBeTrue();
+        expect( test.filter ).toBe( '' );
+      } );
+
+      it( 'can mitigate SQL injection ABC=A', function () {
+        var mockURL = { 'filter': '20 gt 1' };
         var test = mock.parse( mockURL, columns );
         expect( test.error ).toBeTrue();
         expect( test.filter ).toBe( '' );

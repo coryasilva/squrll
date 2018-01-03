@@ -86,7 +86,7 @@ _The filter expression is comprised of Logical and Binary expressions with a fam
 
 _ex:_ `rank gte 90 and ( status in "active,disabled,inactive" or edge_case eg true )`
 
-| URL Operators | SQL Operator | Expression Type |
+| URL Operators | SQL | Description |
 | --- | --- | --- |
 | or | OR | Logical |
 | and | AND | Logical |
@@ -215,20 +215,21 @@ If you have any concerns that are not covered by the tests let's add them!
 
 ### TODO
 
-#### High Priority
-
-- Allow sets/arrays/lists
-  - `LIKE ANY`
-  - `NOT LIKE ANY`
-  - `ILIKE ANY`
-  - `NOT ILIKE ANY`
-  - `ANY`
-  - `NOT ANY`
-  - `ALL`
 - Have Travis CI actually run some queries against postgres
-
-#### Low Priority
-
+- Verify IS TRUE / IS NOT TRUE is working correctly
+- Verify IN statements nested commas
+- Allow sets/arrays/lists (not varients might be difficult...)
+  - `LIKE ANY` `likeany`
+  - `NOT LIKE ANY` `nlikeany`
+  - `ILIKE ANY` `ilikeany`
+  - `NOT ILIKE ANY` `nilikeany`
+  - `ANY` `any`
+  - `NOT ANY` `nany`
+  - `ALL` `all`
+- Add distinct (is this necessary?)
+  - `IS DISTINCT` `isdistinct`
+  - `IS NOT DISTINCT` `nisdistinct`
+- Add [range operators](https://www.postgresql.org/docs/9.3/static/functions-range.html)
 - Consider allowing some operators to be disabled: `settings.disabledOperators: {}`
 - Consider using cb-validator to further confine literals
 - Consider allowing the filter values to be mutated by a UDF.

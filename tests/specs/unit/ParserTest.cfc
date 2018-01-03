@@ -21,8 +21,6 @@ component extends="testbox.system.BaseSpec" {
 
   }
   function run() {
-    //expression = '(a gte .1 and (b neq 0 or c in "a,b,c" or d in "-1,2,3") or e like "_blah_") and f lt -5';
-    //expression = '(a gte .3 and b lt 2) and c lt 1';
 
     describe( 'Parser Error Handling', function () {
 

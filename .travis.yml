@@ -23,7 +23,8 @@ install:
   - sudo apt-get update && sudo apt-get --assume-yes install commandbox
   - box install
 before_script:
-  - psql -c 'create database travis_ci_test;' -U postgres
+  - psql -U postgres -a -q -f tests/resources/test.sql
+  - psql -U postgres -c 'SELECT * FROM enduser_document;'
   - box server start cfengine=$ENGINE port=8500
 script:
   - box testbox run runner='http://127.0.0.1:8500/tests/runner.cfm'

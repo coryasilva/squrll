@@ -138,6 +138,21 @@ component extends="testbox.system.BaseSpec" {
         expect( test.error ).toBeFalse();
       } );
 
+      it( 'can handle IS [NOT] NULL', function () {
+        var mockURL = { 'filter': 'a is null and b nis null' };
+        var test = mock.parse( mockURL, { a: 'integer', b: 'integer' } );
+        expect( test.filter ).toBe( ' AND a IS :squrll_a AND b IS NOT :squrll_b ' );
+        expect( test.queryParams ).toBe( { 'squrll_a': { 'cfsqltype': 'integer', 'null': true }, 'squrll_b': { 'cfsqltype': 'integer', 'null': true } } );
+      } );
+
+      /*
+      it( 'can handle IS [NOT] TRUE', function () {
+        var mockURL = { 'filter': 'a is true and b nis false' };
+        var test = mock.parse( mockURL, { a: 'boolean', b: 'boolean' } );
+        expect( test.filter ).toBe( ' AND a IS TRUE AND b IS NOT FALSE ' );
+      } );
+      */
+
     } );
 
     describe( 'SQL comment mitigation', function () {

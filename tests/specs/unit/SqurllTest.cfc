@@ -1,20 +1,10 @@
-component extends="testbox.system.BaseSpec" {
+component extends='tests.base' {
 
   function beforeAll() {
-    var mockSettings = {
-      countUrlParam:   'count'
-      ,filterUrlParam: 'filter'
-      ,sortUrlParam:   'sort'
-      ,limitUrlParam:  'limit'
-      ,offsetUrlParam: 'offset'
-      ,filterPrepend:  'AND'
-      ,sortPrepend:    'ORDER BY'
-      ,defaultLimit:   20
-      ,allowNoLimit:   false
-      ,columnTypes:    { 'created_date': 'cf_sql_timestamp' }
-    };
+    var mockSettings = mockSettings();
+    mockSettings.columnTypes = { 'created_date': 'cf_sql_timestamp' };
+    
     // Create target mock object
-
     mockValidator = prepareMock( createObject( 'component', 'models.Validator' ) );
     mockValidator.init();
 
@@ -149,6 +139,18 @@ component extends="testbox.system.BaseSpec" {
         var test = mock.parse( mockURL, { a: 'boolean', b: 'boolean' } );
         expect( test.filter ).toBe( ' AND a IS TRUE AND b IS NOT FALSE ' );
       } );
+
+      /*
+      it( 'ACTUAL SQL TEST', function () {
+        var sql = getActualSql(
+          'select * from fake_table where a IN (:a)'
+          ,{
+            a: {value: '1,a|2|3|4', list:true, separator:'|', cfsqltype:'varchar'}
+          }
+        )
+        writeDump(sql);
+      } );
+      */
 
     } );
 

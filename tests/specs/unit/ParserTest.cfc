@@ -1,24 +1,10 @@
-component extends="testbox.system.BaseSpec" {
+component extends='tests.base' {
 
   function beforeAll() {
     // Create target mock object
     mock = prepareMock( createObject( 'component', 'models.Parser' ) );
     mock.init();
-    // Create mock settings
-    var settings = {
-      countUrlParam:   'count'
-      ,filterUrlParam: 'filter'
-      ,sortUrlParam:   'sort'
-      ,limitUrlParam:  'limit'
-      ,offsetUrlParam: 'offset'
-      ,filterPrepend:  'AND'
-      ,sortPrepend:    'ORDER BY'
-      ,defaultLimit:   20
-      ,allowNoLimit:   false
-      ,columnTypes:    {}
-    };
-    mock.$property( 'settings', 'variables', settings );
-
+    mock.$property( 'settings', 'variables', mockSettings() );
   }
   function run() {
 

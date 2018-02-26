@@ -1,4 +1,4 @@
-component extends="testbox.system.BaseSpec" {
+component extends='tests.base' {
 
   function beforeAll() {
     // Create target mock object
@@ -6,20 +6,7 @@ component extends="testbox.system.BaseSpec" {
     mockValidator = prepareMock( createObject( 'component', 'models.Validator' ) );
     mockValidator.init();
 
-    // Create mock settings
-    var settings = {
-      countUrlParam:   'count'
-      ,filterUrlParam: 'filter'
-      ,sortUrlParam:   'sort'
-      ,limitUrlParam:  'limit'
-      ,offsetUrlParam: 'offset'
-      ,filterPrepend:  'AND'
-      ,sortPrepend:    'ORDER BY'
-      ,defaultLimit:   20
-      ,allowNoLimit:   false
-      ,columnTypes:    {}
-    };
-    mock.$property( 'settings', 'variables', settings );
+    mock.$property( 'settings', 'variables', mockSettings() );
     mock.$property( 'Validator', 'variables', mockValidator );
     mock.init();
   }

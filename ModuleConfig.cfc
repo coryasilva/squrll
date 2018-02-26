@@ -16,6 +16,7 @@ component {
       ,defaultLimit:   20         // Default record limit when not defined, ignored if allowNoLimit is true
       ,allowNoLimit:   false      // Allow unlimited rows to be returned
       ,columnTypes:    {}         // Allow and type these columns on all requests `{ columnName: 'cf_sql_type' }`
+      ,listSeparator:  '|'        // Default list separator
     };
   }
 }

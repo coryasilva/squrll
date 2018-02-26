@@ -1,4 +1,4 @@
-component extends="testbox.system.BaseSpec" {
+component extends='tests.base' {
 
   function beforeAll() {
     // Create target mock object

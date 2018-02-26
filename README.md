@@ -60,7 +60,7 @@ function getStuff( tenantID, squrll ) {
 
 ### Purpose
 
-Instead of coding specific filter behaviors and sorting flags we can instead use a repeatable, configurable, and standard way to define filters, sorts, and paging.  This project is intended to work with legacy projects but could be used for new projects as well.
+When creating page controllers or REST endpoints we often need to support sorting and filtering.  This module provides a standardized, URL safe syntax to describe filters, sorts, and counts.  The URL syntax is parsed and then safely composed into raw, parameterized SQL snippets to be used with the base select statments.
 
 ### SQL Dialects
 
@@ -174,7 +174,7 @@ Struct keys must be the column names while the values are either a `'cf_sql_type
 | `type` | _string_ | true | _none_ |  [see cfqueryparam](https://cfdocs.org/cfqueryparam) |
 | `maxLenth` | _numeric_ | false | _none_ | [see cfqueryparam](https://cfdocs.org/cfqueryparam) |
 | `scale` | _numeric_ | false | _none_ | Applies to `cf_sql_numeric` and `cf_sql_decimal` |
-| `list` | _boolean_ | false | _none_ | |
+| `name` | _string_ | false | _none_ | Actual column name if different from parent struct key |
 | `separator` | _string_ | false | `','` |  Must be one of the following: `, ; | :` |
 
 ### Data Types
@@ -215,9 +215,10 @@ If you have any concerns that are not covered by the tests let's add them!
 
 ### TODO
 
+- Allow literals to be mutated by a UDF
 - Have Travis CI actually run some queries against postgres
-- Verify IS TRUE / IS NOT TRUE is working correctly
-- Verify IN statements nested commas
+- Allow cb-validator to further confine literals
+- Allow some operators to be disabled: `settings.disabledOperators: {}`
 - Allow sets/arrays/lists (not varients might be difficult...)
   - `LIKE ANY` `likeany`
   - `NOT LIKE ANY` `nlikeany`
@@ -230,6 +231,3 @@ If you have any concerns that are not covered by the tests let's add them!
   - `IS DISTINCT` `isdistinct`
   - `IS NOT DISTINCT` `nisdistinct`
 - Add [range operators](https://www.postgresql.org/docs/9.3/static/functions-range.html)
-- Consider allowing some operators to be disabled: `settings.disabledOperators: {}`
-- Consider using cb-validator to further confine literals
-- Consider allowing the filter values to be mutated by a UDF.

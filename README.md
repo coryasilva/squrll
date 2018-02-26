@@ -216,10 +216,7 @@ If you have any concerns that are not covered by the tests let's add them!
 ### TODO
 
 - Allow literals to be mutated by a UDF
-- Have Travis CI actually run some queries against postgres
-- Allow cb-validator to further confine literals
-- Allow some operators to be disabled: `settings.disabledOperators: {}`
-- Allow sets/arrays/lists (not varients might be difficult...)
+- Additional Operators
   - `LIKE ANY` `likeany`
   - `NOT LIKE ANY` `nlikeany`
   - `ILIKE ANY` `ilikeany`
@@ -227,7 +224,6 @@ If you have any concerns that are not covered by the tests let's add them!
   - `ANY` `any`
   - `NOT ANY` `nany`
   - `ALL` `all`
-- Add distinct (is this necessary?)
   - `IS DISTINCT` `isdistinct`
   - `IS NOT DISTINCT` `nisdistinct`
-- Add [range operators](https://www.postgresql.org/docs/9.3/static/functions-range.html)
+  - [range](https://www.postgresql.org/docs/9.3/static/functions-range.html)

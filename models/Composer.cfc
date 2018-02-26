@@ -299,7 +299,12 @@ component {
     }
 
     else if ( columnTypes.keyExists( parts[ 1 ] ) ) {
-      result.sql &= ' #parts[ 1 ]#';
+      if ( isStruct(columnTypes[parts[ 1 ]]) && columnTypes[parts[ 1 ]].keyExists('name') ) {
+        result.sql &= ' #columnTypes[parts[ 1 ]].name#';
+      }
+      else {
+        result.sql &= ' #parts[ 1 ]#';
+      }
     }
     else {
       result.error = true;

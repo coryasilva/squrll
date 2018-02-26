@@ -147,18 +147,6 @@ component extends='tests.base' {
         expect( test.filter ).toBe( ' AND a IS TRUE AND b IS NOT FALSE ' );
       } );
 
-      /*
-      it( 'ACTUAL SQL TEST', function () {
-        var sql = getActualSql(
-          'select * from fake_table where a IN (:a)'
-          ,{
-            a: {value: '1,a|2|3|4', list:true, separator:'|', cfsqltype:'varchar'}
-          }
-        )
-        writeDump(sql);
-      } );
-      */
-
     } );
 
     describe( 'SQL comment mitigation', function () {
@@ -216,8 +204,8 @@ component extends='tests.base' {
         expect( test.filter ).toBe( '' );
       } );
 
-      it( 'can mitigate SQL injection ABC=A', function () {
-        var mockURL = { 'filter': '20 gt 1' };
+      it( 'can mitigate SQL injection 2>1', function () {
+        var mockURL = { 'filter': '2 gt 1' };
         var test = mock.parse( mockURL, columns );
         expect( test.error ).toBeTrue();
         expect( test.filter ).toBe( '' );

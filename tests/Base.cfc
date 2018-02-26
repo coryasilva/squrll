@@ -1,5 +1,8 @@
 component extends='testbox.system.BaseSpec' {
 
+  /**
+   * Returns some default settings
+   */
   function mockSettings(){
     return {
       countUrlParam:   'count'
@@ -16,6 +19,13 @@ component extends='testbox.system.BaseSpec' {
     };
   }
 
+  /**
+   * This will return the actual sql from an intentionally erronous query.
+   * `select * from fake_table where a > :a`
+   *
+   * @sql Sql string 
+   * @params Struct of cfqueryparams
+   */
   function getActualSql( sql, params ) {
     try {
       queryExecute( sql, params );

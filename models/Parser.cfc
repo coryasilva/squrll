@@ -20,6 +20,10 @@ component assessors='false' {
   /* Constants */
   variables.IDENTIFIER      = 'Identifier';
   variables.LITERAL         = 'Literal';
+  variables.BOOLEAN         = 'Boolean';
+  variables.STRING          = 'String';
+  variables.NUMBER          = 'Number';
+  variables.NULL            = 'Null';
   variables.BINARY_EXP      = 'BinaryExpression';
   variables.LOGICAL_EXP     = 'LogicalExpression';
   variables.PERIOD_CODE     = 46; // '.'
@@ -56,9 +60,9 @@ component assessors='false' {
    * The values to return for the various literals we may encounter
    */
   variables.literals = {
-    'true':   true
-    ,'false': false
-    ,'null':  'null'
+    'true':   { 'value': 'TRUE',   'type': variables.BOOLEAN }
+    ,'false': { 'value': 'FALSE',  'type': variables.BOOLEAN }
+    ,'null':  { 'value': 'NULL',   'type': variables.NULL }
   };
 
   public Parser function init() {
@@ -365,6 +369,7 @@ component assessors='false' {
 
     return {
       'type':   variables.LITERAL
+      ,'subtype': variables.NUMBER
       ,'value': LSParseNumber( number )
       ,'raw':   number
       ,'error': false
@@ -398,6 +403,7 @@ component assessors='false' {
 
     return {
       'type':   variables.LITERAL
+      ,'subtype': variables.STRING
       ,'value': str
       ,'raw':   quote & str & quote
       ,'error': false
@@ -438,7 +444,8 @@ component assessors='false' {
     if ( structKeyExists( variables.literals, identifier ) ) {
       return {
         'type':   variables.LITERAL
-        ,'value': variables.literals[ identifier ]
+        ,'value': variables.literals[ identifier ].value
+        ,'subtype': variables.literals[ identifier ].type
         ,'raw':   identifier
         ,'error': false
       };

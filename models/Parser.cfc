@@ -100,7 +100,7 @@ component assessors='false' {
       return {
         'tree': ''
         ,'error': true
-        ,'errorMessage': error.message
+        ,'errorMessages': error.message
       };
     }
   }

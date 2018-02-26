@@ -208,6 +208,7 @@ If you have any concerns that are not covered by the tests let's add them!
 - [**OData** _- Simplifying data sharing across disparate applications in enterprise, Cloud, and mobile devices_](http://docs.oasis-open.org/odata/odata/v4.0/odata-v4.0-part2-url-conventions.html)
 - [**PostgREST** _- serve a restful API from any postgres database_](https://postgrest.com/en/v4.3/)
 - [**jsep** _- tiny javascript expression parser_](http://jsep.from.so/)
+- [**elpete's Coldbox Module Template**](https://github.com/elpete/cb-module-template)
 
 ---
 

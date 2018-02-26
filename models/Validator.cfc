@@ -96,10 +96,6 @@ component {
     return bools.findNoCase( value ) != 0;
   }
 
-  public boolean function _isNull( required string value ) {
-    return value == 'null';
-  }
-
   public boolean function _isDate( required string value ) {
     var regex = '^(\d{4}-\d\d-\d\d)$';
     var regexTest = reFind( regex, value ) == 1;

@@ -124,13 +124,6 @@ component extends="testbox.system.BaseSpec" {
         expect( mock._isBoolean( '2' ) ).toBeFalse();
       } );
 
-      it( 'can validate null', function () {
-        expect( mock._isNull( 'null' ) ).toBeTrue();
-        expect( mock._isNull( 'Null' ) ).toBeTrue();
-        expect( mock._isNull( 'NULL' ) ).toBeTrue();
-        expect( mock._isNull( '' ) ).toBeFalse();
-      } );
-
       it( 'can validate an ISO Date', function () {
         expect( mock._isDate( '2016-02-29' ) ).toBeTrue(); // leap year
         expect( mock._isDate( '2017-02-29' ) ).toBeFalse();

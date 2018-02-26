@@ -163,7 +163,7 @@ _Column types are passed into each filter and sort function call and inherit fro
 // Example
 columnTypes = {
   'name': 'cf_sql_varchar'
-  ,'active': { 'type': 'cf_sql_varchar' }
+  ,'active': { 'cfsqltype': 'cf_sql_varchar' }
 };
 ```
 
@@ -171,9 +171,7 @@ Struct keys must be the column names while the values are either a `'cf_sql_type
 
 | Key | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| `type` | _string_ | true | _none_ |  [see cfqueryparam](https://cfdocs.org/cfqueryparam) |
-| `maxLenth` | _numeric_ | false | _none_ | [see cfqueryparam](https://cfdocs.org/cfqueryparam) |
-| `scale` | _numeric_ | false | _none_ | Applies to `cf_sql_numeric` and `cf_sql_decimal` |
+| `cfsqltype` | _string_ | true | _none_ |  [see cfqueryparam](https://cfdocs.org/cfqueryparam) |
 | `name` | _string_ | false | _none_ | Actual column name if different from parent struct key |
 | `separator` | _string_ | false | `','` |  Must be one of the following: `, ; | :` |
 

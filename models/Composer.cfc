@@ -22,6 +22,8 @@ component {
     ,'gte':    '>='
   };
 
+  variables.listOperators = ['in', 'nin'];
+
   public Composer function init() {
     return this;
   }
@@ -145,7 +147,7 @@ component {
       return result;
     }
 
-    if ( leaf.keyExists( 'operator' ) && variables.operators.keyExists( leaf.operator ) ) {
+    if ( variables.operators.keyExists( leaf.operator ) ) {
       result.sql &= variables.operators[ leaf.operator ] & ' ';
     }
 
@@ -153,6 +155,7 @@ component {
       var paramName = uniqueKey( 'squrll_' & leaf.left.name, result.queryParams );
       var paramConfig = {};
       var isNull = leaf.right.subtype == 'Null'
+      var isList = listOperators.contains( leaf.operator );
       var cfSqlType = '';
 
       // Build query parameter config struct
@@ -168,6 +171,14 @@ component {
       }
 
       paramConfig[ 'cfsqltype' ] = transformCfSqlType( cfSqlType );
+      
+      if ( isList ) {
+        paramConfig[ 'list' ] = isList;
+        paramConfig[ 'separator' ] = settings.separator
+        if ( isStruct( columnTypes[ leaf.left.name ] ) && structKeyExists( columnTypes[ leaf.left.name ], 'separator' ) ) {
+          paramConfig[ 'separator' ] = columnTypes[ leaf.left.name ].separator;
+        }
+      }
 
       if ( isNull ) {
         paramConfig[ 'null' ] = true;
@@ -184,6 +195,10 @@ component {
 
       if ( leaf.right.subtype == 'Boolean' ) {
         result.sql &= '#leaf.right.value# ';
+      }
+      else if ( isList ) {
+        result.queryParams.append( { '#paramName#': paramConfig } );
+        result.sql &= '(:#paramName#) ';
       }
       else {
         result.queryParams.append( { '#paramName#': paramConfig } );

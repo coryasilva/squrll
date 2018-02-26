@@ -149,68 +149,56 @@ component extends='tests.base' {
 
     } );
 
-    describe( 'SQL comment mitigation', function () {
-      var columns = { 'username': 'varchar' };
-      var expectation = ' AND username = :squrll_username ';
+    describe( 'Squrll Live Postgres', function () {
 
-      it( 'can mitigate SQL injection /*', function () {
-        var badValue = '1'' or ''1'' = ''1''))/*';
-        var mockURL = { 'filter': 'username eq "1'' or ''1'' = ''1''))/*"' };
-        var test = mock.parse( mockURL, columns );
-        expect( test.filter ).toBe( expectation );
-        expect( test.queryParams.squrll_username.value ).toBe( badValue );
+      it( 'can work with a real world example', function () {
+        // Model
+        var documentSchema = {
+          'title': 'cf_sql_varchar'
+          ,'likes': 'cf_sql_bigint'
+          ,'category': { cfsqltype: 'cf_sql_varchar', name: 'category_display_name' }
+         };
+
+        // Controller
+        var mockURL = {
+          'count': 'true'
+          ,'filter': 'likes gt 1 and title ilike "Xer%"'
+          ,'sort': 'category.desc'
+        };
+        var squrll = mock.parse( mockURL, documentSchema );
+
+        // Service
+        var sql = 'SELECT * ';
+        sql &= len(squrll.count) > 0 ? ', #squrll.count#' : '';
+        sql &= 'FROM enduser_document WHERE tenant_id = :tenant_id';
+        sql &= squrll.filter;
+        sql &= squrll.sort;
+        sql &= squrll.range;
+  
+        var queryParams = { tenant_id: { cfsqltype: 'bigint', value: 1 } };
+        queryParams.append(squrll.queryParams);
+
+        var result = queryExecute(sql, queryParams);
+
+        result.each( function( row ) {
+          expect( row.likes > 1 ).toBeTrue();
+          expect( findNoCase( 'Xer', row.title ) > 0 ).toBeTrue();
+          expect( row.keyExists( '_count' ) ).toBeTrue();
+        } );
       } );
-
-      it( 'can mitigate SQL injection --', function () {
-        var badValue = '1'' or ''1'' = ''1''--';
-        var mockURL= { 'filter': 'username eq "1'' or ''1'' = ''1''--"' };
-        var test = mock.parse( mockURL, columns );
-        expect( test.filter ).toBe( expectation );
-        expect( test.queryParams.squrll_username.value ).toBe( badValue );
+      
+      /*
+      it( 'ACTUAL SQL TEST', function () {
+        var sql = getActualSql(
+          'select * from fake_table where a IN (:a)'
+          ,{
+            a: {value: '1,a|2|3|4', list:true, separator:'|', cfsqltype:'varchar'}
+          }
+        )
+        writeDump(sql);
       } );
-
+      */
     } );
 
-    describe( 'SQL 1=1 mitigation', function () {
-      /* When prefixing the filter clause with AND this does not really matter
-         but should still not be allowed. */
-      var columns = { 'username': 'varchar' };
-
-      it( 'can mitigate SQL injection 1=1', function () {
-        var mockURL = { 'filter': '1 eq 1' };
-        var test = mock.parse( mockURL, columns );
-        expect( test.error ).toBeTrue();
-        expect( test.filter ).toBe( '' );
-      } );
-
-      it( 'can mitigate SQL injection "a" = "a"', function () {
-        var mockURL = { 'filter': '"a" eq "a"' };
-        var test = mock.parse( mockURL, columns );
-        expect( test.error ).toBeTrue();
-        expect( test.filter ).toBe( '' );
-      } );
-
-      it( 'can mitigate SQL injection column = column', function () {
-        var mockURL = { 'filter': 'column eq column' };
-        var test = mock.parse( mockURL, columns );
-        expect( test.error ).toBeTrue();
-        expect( test.filter ).toBe( '' );
-      } );
-
-      it( 'can mitigate SQL injection ABC=A', function () {
-        var mockURL = { 'filter': '"ABC" gt "A"' };
-        var test = mock.parse( mockURL, columns );
-        expect( test.error ).toBeTrue();
-        expect( test.filter ).toBe( '' );
-      } );
-
-      it( 'can mitigate SQL injection 2>1', function () {
-        var mockURL = { 'filter': '2 gt 1' };
-        var test = mock.parse( mockURL, columns );
-        expect( test.error ).toBeTrue();
-        expect( test.filter ).toBe( '' );
-      } );
-
-    } );
   }
 }

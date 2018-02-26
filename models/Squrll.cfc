@@ -8,6 +8,14 @@ component accessors='false' {
     return this;
   }
 
+  /**
+   * Convenience/facade function for processing all the url parameters
+   *
+   * @urlParams 
+   * @columnTypes 
+   * @defaultLimit 
+   * @allowNoLimit 
+   */
   public struct function parse(
     required struct urlParams
     ,struct columnTypes={}
@@ -44,6 +52,11 @@ component accessors='false' {
     return result;
   }
 
+  /**
+   * Parses the count expression
+   *
+   * @value the value from the count url parameter
+   */
   public struct function parseCount( string value='' ) {
     var result = {
       'sql': ''
@@ -58,6 +71,12 @@ component accessors='false' {
     return result;
   }
 
+  /**
+   * Parses the filter expression
+   *
+   * @expression the expression from the filter url parameter
+   * @columnTypes struct of column metadata
+   */
   public struct function parseFilter( string expression='', struct columnTypes={} ) {
     var result = {
       'sql': ''
@@ -81,6 +100,12 @@ component accessors='false' {
     return result;
   }
 
+  /**
+   * Parses the sort expression
+   *
+   * @expression the expression from the sort url parameter
+   * @columnTypes struct of column metadata
+   */
   public struct function parseSort( string expression='', struct columnTypes={} ) {
     var result = {
       'sql': ''
@@ -91,6 +116,14 @@ component accessors='false' {
     return Composer.sort( listToArray( expression, ',' ), columnTypes );
   }
 
+  /**
+   * Parses the range/pagination expression
+   *
+   * @offset the value from the offset url parameter
+   * @limit the value from the limit url parameter
+   * @defaultLimit boolean to override the setting in the module configs
+   * @allowNoLimit boolean to override the setting in the module configs
+   */
   public struct function parseRange( string offset='', string limit='', numeric defaultLimit=20, boolean allowNoLimit=false ) {
     var result = {
       'sql': ''
@@ -134,6 +167,11 @@ component accessors='false' {
     return result;
   }
 
+  /**
+   * Maps the url parameter names from the module settings
+   *
+   * @params url parameters
+   */
   private struct function matchParamNames( required struct params ) {
     var defaults = {};
     defaults[ settings.countUrlParam ]  = '';

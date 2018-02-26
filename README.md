@@ -215,7 +215,8 @@ If you have any concerns that are not covered by the tests let's add them!
 
 ### TODO
 
-- Allow literals to be mutated by a UDF
+- Test/refine date operations
+- Allow literals to be transformed by a UDF
 - Additional Operators
   - `LIKE ANY` `likeany`
   - `NOT LIKE ANY` `nlikeany`

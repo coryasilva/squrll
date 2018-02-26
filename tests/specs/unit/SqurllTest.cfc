@@ -109,6 +109,13 @@ component extends='tests.base' {
         expect( test.error ).toBeFalse();
       } );
 
+      it( 'can use name key from struct values', function () {
+        var mockURL = { 'filter': 'active neq true' };
+        var test = mock.parse( mockURL, { 'active': { 'cfsqltype': 'boolean', 'name': 'is_active' } } );
+        expect( test.filter ).toBe( ' AND is_active <> TRUE ' );
+        expect( test.error ).toBeFalse();
+      } );
+
       it( 'can properly order `or` & `and`', function () {
         var mockURL = {
           'filter': 'a eq 1 and b eq 2 or c eq 3 and d eq 4 or e eq 5 or f eq 6'

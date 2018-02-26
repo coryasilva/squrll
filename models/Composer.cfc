@@ -132,7 +132,13 @@ component {
     }
 
     if ( leaf.left.type == 'Identifier' ) {
-      result.sql &= leaf.left.name & ' ';
+      // Map the column name if 'name' key is defined in the column struct
+      if ( columnTypes.keyExists( leaf.left.name ) && isStruct(columnTypes[ leaf.left.name ]) && columnTypes[ leaf.left.name ].keyExists( 'name' ) ) {
+        result.sql &= columnTypes[ leaf.left.name ].name & ' ';
+      }
+      else {
+        result.sql &= leaf.left.name & ' ';
+      }
       if ( !columnTypes.keyExists( leaf.left.name ) ) {
         result.error = true;
         result.errorMessages.append( '#settings.filterUrlParam#: Column "#leaf.left.name#" does not exist or is not allowed here.' );

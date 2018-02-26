@@ -18,7 +18,7 @@ component {
     class: 'org.postgresql.Driver'
   , bundleName: 'org.postgresql.jdbc42'
   , bundleVersion: '9.4.1212'
-  , connectionString: 'jdbc:postgresql://localhost:5432/postgres'
+  , connectionString: 'jdbc:postgresql://localhost:5432/squrll_test'
   , username: 'postgres'
   , password: 'postgres'
   , blob: true

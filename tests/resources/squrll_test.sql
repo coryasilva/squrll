@@ -1,15 +1,16 @@
-CREATE DATABASE travis_ci_test TEMPLATE template0;
+DROP DATABASE IF EXISTS squrll_test;
+CREATE DATABASE squrll_test TEMPLATE template0;
 
-\c travis_ci_test
+\c squrll_test
 
-CREATE TABLE company (
+CREATE TABLE tenant (
    id BIGSERIAL PRIMARY KEY
   ,display_name TEXT
   ,active BOOLEAN DEFAULT TRUE
   ,created_date TIMESTAMP DEFAULT NOW()
 );
 
-INSERT INTO company ( id, display_name ) VALUES
+INSERT INTO tenant ( id, display_name ) VALUES
    ( 1, 'Company A' )
   ,( 2, 'Company B' )
   ,( 3, 'Company C' )
@@ -20,10 +21,10 @@ CREATE TABLE enduser (
   ,display_name TEXT NOT NULL
   ,active BOOLEAN DEFAULT TRUE
   ,created_date TIMESTAMP DEFAULT NOW()
-  ,company_id BIGSERIAL REFERENCES company ( id )
+  ,tenant_id BIGSERIAL REFERENCES tenant ( id )
 );
 
-INSERT INTO enduser ( id, display_name, active, company_id ) VALUES
+INSERT INTO enduser ( id, display_name, active, tenant_id ) VALUES
    ( 1, 'Bob', TRUE, 1 )
   ,( 2, 'Janet', TRUE, 1 )
   ,( 3, 'Maria', TRUE, 1 )
@@ -59,7 +60,7 @@ CREATE TABLE document (
   ,created_date TIMESTAMP DEFAULT NOW()
   ,category_id TEXT NOT NULL REFERENCES category ( id )
   ,enduser_id BIGSERIAL NOT NULL REFERENCES enduser ( id )
-  ,company_id BIGSERIAL NOT NULL REFERENCES company ( id )
+  ,tenant_id BIGSERIAL NOT NULL REFERENCES tenant ( id )
 );
 
 INSERT INTO document (
@@ -69,7 +70,7 @@ INSERT INTO document (
   ,summary
   ,category_id
   ,enduser_id
-  ,company_id
+  ,tenant_id
 ) VALUES
    ( 1, 27, 'Xerox Quote 001', '50 multi-function machines', 'quote', 1, 1 )
   ,( 2, 0, 'Xerox Purchase Order 001', 'We converted them!', 'purchase_order', 1, 1 )
@@ -96,13 +97,13 @@ CREATE VIEW enduser_document AS
      doc.*
     ,usr.display_name AS "enduser_display_name"
     ,cat.display_name AS "category_display_name"
-    ,com.display_name AS "company_display_name"
+    ,ten.display_name AS "tenant_display_name"
   FROM
      document doc
     ,enduser usr
     ,category cat
-    ,company com
+    ,tenant ten
   WHERE doc.enduser_id = usr.id
     AND doc.category_id = cat.id
-    AND doc.company_id = com.id
+    AND doc.tenant_id = ten.id
 ;

@@ -68,10 +68,9 @@ component extends="testbox.system.BaseSpec" {
           }
         );
         expect( test.count ).toBe( ' COUNT(*) OVER() AS _count ' );
-        expect( test.filter ).toBe( ' AND title LIKE :squrll_title AND active = :squrll_active ' );
+        expect( test.filter ).toBe( ' AND title LIKE :squrll_title AND active = TRUE ' );
         expect( test.queryParams ).toBe( {
           'squrll_title': { 'cfsqltype': 'cf_sql_varchar', 'value': '_Manager_' }
-          ,'squrll_active':  { 'cfsqltype': 'cf_sql_varchar', 'value': 'true' }
         } );
         expect( test.sort ).toBe( ' ORDER BY name DESC NULLS FIRST ' );
         expect( test.range ).toBe( ' LIMIT 20 OFFSET 40 ' );
@@ -116,7 +115,7 @@ component extends="testbox.system.BaseSpec" {
       it( 'can use columnType struct values', function () {
         var mockURL = { 'filter': 'active neq true' };
         var test = mock.parse( mockURL, { 'active': { 'cfsqltype': 'boolean' } } );
-        expect( test.filter ).toBe( ' AND active <> :squrll_active ' );
+        expect( test.filter ).toBe( ' AND active <> TRUE ' );
         expect( test.error ).toBeFalse();
       } );
 
@@ -144,14 +143,12 @@ component extends="testbox.system.BaseSpec" {
         expect( test.filter ).toBe( ' AND a IS :squrll_a AND b IS NOT :squrll_b ' );
         expect( test.queryParams ).toBe( { 'squrll_a': { 'cfsqltype': 'integer', 'null': true }, 'squrll_b': { 'cfsqltype': 'integer', 'null': true } } );
       } );
-
-      /*
+      
       it( 'can handle IS [NOT] TRUE', function () {
         var mockURL = { 'filter': 'a is true and b nis false' };
         var test = mock.parse( mockURL, { a: 'boolean', b: 'boolean' } );
         expect( test.filter ).toBe( ' AND a IS TRUE AND b IS NOT FALSE ' );
       } );
-      */
 
     } );
 

@@ -152,7 +152,7 @@ component {
     if ( leaf.right.type == 'Literal' ) {
       var paramName = uniqueKey( 'squrll_' & leaf.left.name, result.queryParams );
       var paramConfig = {};
-      var isNull = Validator._isNull( leaf.right.value );
+      var isNull = leaf.right.subtype == 'Null'
       var cfSqlType = '';
 
       // Build query parameter config struct
@@ -182,8 +182,13 @@ component {
         return result;
       }
 
-      result.queryParams.append( { '#paramName#': paramConfig } );
-      result.sql &= ':#paramName# ';
+      if ( leaf.right.subtype == 'Boolean' ) {
+        result.sql &= '#leaf.right.value# ';
+      }
+      else {
+        result.queryParams.append( { '#paramName#': paramConfig } );
+        result.sql &= ':#paramName# ';
+      }
     }
 
     // TODO: Handle right Identifier?

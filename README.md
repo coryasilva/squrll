@@ -214,7 +214,6 @@ If you have any concerns that are not covered by the tests let's add them!
 
 ### TODO
 
-- Test/refine date operations
 - Allow literals to be transformed by a UDF
 - Additional Operators
   - `LIKE ANY` `likeany`

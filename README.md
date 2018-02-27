@@ -14,23 +14,23 @@ _Squrll safely creates SQL clauses from URL parameters_
 
 ```java
 var columnTypes = {
-  'title': 'cf_sql_varchar'
-  ,'active': 'cf_sql_boolean'
-  ,'name': 'varchar'
+   title: 'cf_sql_varchar'
+  ,active: 'cf_sql_boolean'
+  ,name: 'varchar'
 };
 var result = Squrll.parse( URL, columnTypes );
 // result equals
 {
-   'count': ' COUNT(*) OVER() AS _count '
-  ,'filter': ' AND title LIKE :squrll_title AND active = :squrll_active '
-  ,'queryParams': {
-    'squrll_title': { 'cfsqltype': 'cf_sql_varchar', 'value': '_Manager_' }
-    ,'squrll_active':  { 'cfsqltype': 'cf_sql_varchar', 'value': 'true' }
+   count:  ' COUNT(*) OVER() AS _count '
+  ,filter: ' AND title LIKE :squrll_title AND active = :squrll_active '
+  ,queryParams: {
+     squrll_title:  { cfsqltype: 'cf_sql_varchar', value: '_Manager_' }
+    ,squrll_active: { cfsqltype: 'cf_sql_varchar', value: 'true' }
   }
-  ,'sort': ' ORDER BY name DESC NULLS FIRST '
-  ,'range': ' LIMIT 20 OFFSET 40 '
-  ,'error': false
-  ,'errorMessages': []
+  ,sort:  ' ORDER BY name DESC NULLS FIRST '
+  ,range: ' LIMIT 20 OFFSET 40 '
+  ,error: false
+  ,errorMessages: []
 }
 ```
 
@@ -72,8 +72,8 @@ _SQL clauses are built from URL strings assigned to specific URL parameters._
 
 | URL Param | SQL Clause | Example | Method |
 | --- | --- | --- | --- |
-| filter | WHERE | `?sort=name.dsc.nullsfirst` | `Squrll.parseFilter()` |
-| sort | ORDER BY | `?filter=title like "_Manager_"` | `Squrll.parseSort()` |
+| filter | WHERE | `?filter=title like "_Manager_"` | `Squrll.parseFilter()` |
+| sort | ORDER BY | `??sort=name.dsc.nullsfirst` | `Squrll.parseSort()` |
 | limit | LIMIT | `?limit=15` | `Squrll.parseRange()` |
 | offset | OFFSET | `?offset=30` | `Squrll.parseRange()` |
 | count | -NA- | `?count=true` | `Squrll.parseCount()` |
@@ -152,6 +152,7 @@ settings = {
   ,defaultLimit:   20         // Default record limit when not defined, ignored if allowNoLimit is true
   ,allowNoLimit:   false      // Allow unlimited rows to be returned
   ,columnTypes:    {}         // Allow and type these columns on all requests `{ columnName: 'cf_sql_type' }`
+  ,listSeparator:  '|'        // Default list separator
 };
 ```
 
@@ -162,12 +163,12 @@ _Column types are passed into each filter and sort function call and inherit fro
 ```java
 // Example
 columnTypes = {
-  'name': 'cf_sql_varchar'
-  ,'active': { 'cfsqltype': 'cf_sql_varchar' }
+   name: 'cf_sql_varchar'
+  ,active: { cfsqltype: 'cf_sql_varchar' }
 };
 ```
 
-Struct keys must be the column names while the values are either a `'cf_sql_type'` or a struct with the following allowed keys:
+Struct keys must be the column names while the values are either a `'cf_sql_<type>'` or a struct with the following allowed keys:
 
 | Key | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
@@ -199,7 +200,7 @@ _A subset of the ISO 8601 standard has been employed. (TL'DR Dashes and colons a
 
 This package mitigates SQL injection by parsing the URL into an abstract syntax tree.  Each token is validated upon parsing and the strict language syntax inherently eliminates the threat for SQL injection.  The filter composer also creates `cfqueryparam`'s and qualifies each value against its `cfsqltype` to further limit the attack base.
 
-Also a struct of columns, acting as a whitelist, is required for both filtering and sorting.  Each column must include a `cf_sql_type` in order for the filtering to work. (Sorting only requires that the column exists in the struct).
+Also a struct of columns, acting as a whitelist, is required for both filtering and sorting.  Each column must include a `cf_sql_<type>` in order for the filtering to work. (Sorting only requires that the column exists in the struct).
 
 If you have any concerns that are not covered by the tests let's add them!
 
